@@ -1,0 +1,6 @@
+[package]
+name = "rats"
+version = "0.1.0"
+authors = ["Davis Wahl <dwahl@signalpath.com>"]
+
+[dependencies]
