@@ -7,7 +7,6 @@
 extern crate alloc;
 extern crate core;
 
-#[macro_use]
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
@@ -15,11 +14,14 @@ extern crate serde_derive;
 extern crate bincode;
 extern crate test;
 
-pub mod functor;
-pub mod kind;
-pub mod kinds;
-pub mod context;
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub mod v1;
+pub mod v2;
+pub use v1::*;
+pub use v2::*;
+
+pub fn foo() -> i32 {
+    let i = 5;
 }
+
+#[cfg(test)]
+mod tests {}

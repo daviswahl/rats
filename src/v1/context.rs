@@ -1,9 +1,8 @@
-use std::marker;
-use kind;
-use kind::{Kind};
-use serde::{Serialize, Deserialize};
+use bincode::{deserialize, serialize};
+use kind::Kind;
 use serde::de::DeserializeOwned;
-use bincode::{serialize, deserialize};
+use serde::Serialize;
+use std::marker;
 
 #[derive(Debug, Clone)]
 pub struct Context<K: Kind, I: DeserializeOwned> {
@@ -24,36 +23,59 @@ impl<K: Kind, I: DeserializeOwned> Context<K, I> {
 }
 
 pub unsafe trait UnsafePointerCast {
-    unsafe fn unsafe_cast<T>(self) -> T where T: DeserializeOwned;
+    unsafe fn unsafe_cast<T>(self) -> T
+    where
+        T: DeserializeOwned;
 }
 
 unsafe impl<K: Kind, T: DeserializeOwned> UnsafePointerCast for Context<K, T> {
-    unsafe fn unsafe_cast<G>(self) -> G where G: DeserializeOwned {
+    unsafe fn unsafe_cast<G>(self) -> G
+    where
+        G: DeserializeOwned,
+    {
         deserialize(self.kind.buf().as_slice()).unwrap()
     }
 }
 
-pub trait ExtractKind<C> where C: UnsafePointerCast + FromContext, C::Out: NewType, C::Out: DeserializeOwned {
+pub trait ExtractKind<C>
+where
+    C: UnsafePointerCast + FromContext,
+    C::Out: NewType,
+    C::Out: DeserializeOwned,
+{
     fn extract(c: C) -> <C::Out as NewType>::Type;
 }
 
-impl<C> ExtractKind<C> for C where C: UnsafePointerCast+FromContext, C::Out: NewType, C::Out: DeserializeOwned {
+impl<C> ExtractKind<C> for C
+where
+    C: UnsafePointerCast + FromContext,
+    C::Out: NewType,
+    C::Out: DeserializeOwned,
+{
     fn extract(c: C) -> <C::Out as NewType>::Type {
         unsafe { c.unsafe_cast::<C::Out>() }.get()
     }
 }
 
-pub trait ExtractExt<C> where C: UnsafePointerCast+FromContext+ExtractKind<C>, <C as FromContext>::Out: DeserializeOwned {
+pub trait ExtractExt<C>
+where
+    C: UnsafePointerCast + FromContext + ExtractKind<C>,
+    <C as FromContext>::Out: DeserializeOwned,
+{
     fn extract(self) -> <<C as FromContext>::Out as NewType>::Type;
 }
 
-impl<C> ExtractExt<C> for C where C: UnsafePointerCast+FromContext+ExtractKind<C>, <C as FromContext>::Out: DeserializeOwned {
+impl<C> ExtractExt<C> for C
+where
+    C: UnsafePointerCast + FromContext + ExtractKind<C>,
+    <C as FromContext>::Out: DeserializeOwned,
+{
     fn extract(self) -> <<C as FromContext>::Out as NewType>::Type {
         <C as ExtractKind<C>>::extract(self)
     }
 }
 
-pub trait EraseType<C>{
+pub trait EraseType<C> {
     fn erase(t: C) -> Vec<u8>;
 }
 
@@ -63,11 +85,17 @@ impl<C: Serialize> EraseType<C> for C {
     }
 }
 
-pub trait IntoContextExt<C: IntoContext + EraseType<C>> where C::Item: DeserializeOwned {
+pub trait IntoContextExt<C: IntoContext + EraseType<C>>
+where
+    C::Item: DeserializeOwned,
+{
     fn into_context(self) -> Context<C::Kind, C::Item>;
 }
 
-impl<C: IntoContext + EraseType<C> + Serialize> IntoContextExt<C> for C where C::Item: DeserializeOwned {
+impl<C: IntoContext + EraseType<C> + Serialize> IntoContextExt<C> for C
+where
+    C::Item: DeserializeOwned,
+{
     fn into_context(self) -> Context<<C as IntoContext>::Kind, <C as IntoContext>::Item> {
         Context::from(self)
     }
@@ -94,7 +122,7 @@ mod test {
 
     #[test]
     fn extractor_test() {
-        let k: Context<kinds::Vec, i32> = vec![1,2,3].into_context();
+        let k: Context<kinds::Vec, i32> = vec![1, 2, 3].into_context();
         println!("got k: {:?}", k);
         let result = k.extract();
         println!("extracted from k: {:?}", result);

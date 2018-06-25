@@ -1,8 +1,8 @@
-use kind::{Kind};
+use context::{Context, ExtractExt, IntoContextExt};
+use kind::Kind;
+use kinds;
 use serde;
 use serde::de;
-use context::{Context, ExtractExt, ExtractKind, FromContext, IntoContext, IntoContextExt};
-use kinds;
 
 trait Functor<K>
 where
@@ -12,7 +12,7 @@ where
     where
         F: FnMut(A) -> B,
         A: de::DeserializeOwned,
-        B: de::DeserializeOwned+serde::Serialize;
+        B: de::DeserializeOwned + serde::Serialize;
 }
 
 trait KindFunctorExt<K: Kind> {
@@ -21,7 +21,7 @@ trait KindFunctorExt<K: Kind> {
     fn map<B, F>(self, f: F) -> Context<K, B>
     where
         F: FnMut(Self::Item) -> B,
-        B: de::DeserializeOwned+serde::Serialize;
+        B: de::DeserializeOwned + serde::Serialize;
 }
 
 impl<K: Kind + Functor<K>, T: de::DeserializeOwned> KindFunctorExt<K> for Context<K, T> {
@@ -30,7 +30,7 @@ impl<K: Kind + Functor<K>, T: de::DeserializeOwned> KindFunctorExt<K> for Contex
     fn map<B, F>(self, f: F) -> Context<K, B>
     where
         F: FnMut(Self::Item) -> B,
-        B: de::DeserializeOwned+serde::Serialize,
+        B: de::DeserializeOwned + serde::Serialize,
     {
         <K as Functor<K>>::map::<T, B, F>(self, f)
     }
@@ -41,9 +41,13 @@ impl Functor<kinds::Vec> for kinds::Vec {
     where
         F: FnMut(A) -> B,
         A: de::DeserializeOwned,
-        B: serde::Serialize+de::DeserializeOwned,
+        B: serde::Serialize + de::DeserializeOwned,
     {
-        m.extract().into_iter().map(f).collect::<Vec<B>>().into_context()
+        m.extract()
+            .into_iter()
+            .map(f)
+            .collect::<Vec<B>>()
+            .into_context()
     }
 }
 
@@ -52,7 +56,7 @@ impl Functor<kinds::Option> for kinds::Option {
     where
         F: FnMut(A) -> B,
         A: de::DeserializeOwned,
-        B: de::DeserializeOwned+serde::Serialize
+        B: de::DeserializeOwned + serde::Serialize,
     {
         k.extract().map(f).into_context()
     }
@@ -81,28 +85,36 @@ mod tests {
     #[bench]
     fn bench_vec_map_native(b: &mut Bencher) {
         b.iter(|| {
-           vec![1,2,3].into_iter().map(|i| i * 2).collect::<Vec<i32>>()
+            vec![1, 2, 3]
+                .into_iter()
+                .map(|i| i * 2)
+                .collect::<Vec<i32>>()
         });
     }
 
     #[bench]
     fn bench_vec_map_from_functor(b: &mut Bencher) {
-        b.iter(|| {
-            Context::from(vec![1, 2, 3]).map(|i| i * 2).extract()
-        });
+        b.iter(|| Context::from(vec![1, 2, 3]).map(|i| i * 2).extract());
     }
 
     #[bench]
     fn bench_vec_map_native_2(b: &mut Bencher) {
         b.iter(|| {
-           vec![1,2,3].into_iter().map(|i| i * 2).map(|i| i * 2).collect::<Vec<i32>>()
+            vec![1, 2, 3]
+                .into_iter()
+                .map(|i| i * 2)
+                .map(|i| i * 2)
+                .collect::<Vec<i32>>()
         });
     }
 
     #[bench]
     fn bench_vec_map_from_functor_2(b: &mut Bencher) {
         b.iter(|| {
-            Context::from(vec![1, 2, 3]).map(|i| i * 2).map(|i| i * 2).extract()
+            Context::from(vec![1, 2, 3])
+                .map(|i| i * 2)
+                .map(|i| i * 2)
+                .extract()
         });
     }
 }

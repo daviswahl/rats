@@ -1,15 +1,11 @@
+use context::{Context, FromContext, IntoContext, NewType};
 use kind;
-use kind::{Kind};
-use context::{Context, IntoContext, FromContext, IntoContextExt, NewType};
-use std::mem;
-use serde::ser::{Serialize};
 use serde::de::DeserializeOwned;
 use std::vec;
 
 #[derive(Debug, Clone)]
 pub struct Vec(vec::Vec<u8>);
 
-use std::ptr;
 impl kind::Kind for Vec {
     type Kind = Vec;
 
@@ -43,7 +39,6 @@ impl<T> IntoContext for option::Option<T> {
     type Kind = Option;
     type Item = T;
 }
-
 
 impl<T> IntoContext for vec::Vec<T> {
     type Kind = Vec;
