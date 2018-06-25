@@ -59,7 +59,7 @@ impl Functor<kinds::Option> for kinds::Option {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
 
     #[test]
@@ -74,5 +74,35 @@ mod test {
         let opt: Context<kinds::Option, i32> = Context::from(Some(1));
         let opt = opt.map(|i| i * 2);
         assert_eq!(opt.extract(), Some(2));
+    }
+
+    use test::Bencher;
+
+    #[bench]
+    fn bench_vec_map_native(b: &mut Bencher) {
+        b.iter(|| {
+           vec![1,2,3].into_iter().map(|i| i * 2).collect::<Vec<i32>>()
+        });
+    }
+
+    #[bench]
+    fn bench_vec_map_from_functor(b: &mut Bencher) {
+        b.iter(|| {
+            Context::from(vec![1, 2, 3]).map(|i| i * 2).extract()
+        });
+    }
+
+    #[bench]
+    fn bench_vec_map_native_2(b: &mut Bencher) {
+        b.iter(|| {
+           vec![1,2,3].into_iter().map(|i| i * 2).map(|i| i * 2).collect::<Vec<i32>>()
+        });
+    }
+
+    #[bench]
+    fn bench_vec_map_from_functor_2(b: &mut Bencher) {
+        b.iter(|| {
+            Context::from(vec![1, 2, 3]).map(|i| i * 2).map(|i| i * 2).extract()
+        });
     }
 }

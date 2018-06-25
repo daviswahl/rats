@@ -2,6 +2,8 @@
 #![feature(associated_type_defaults)]
 #![feature(ptr_internals)]
 #![feature(allocator_api)]
+#![feature(test)]
+
 extern crate alloc;
 extern crate core;
 
@@ -11,12 +13,13 @@ extern crate serde;
 extern crate serde_derive;
 
 extern crate bincode;
+extern crate test;
 
 pub mod functor;
 pub mod kind;
 pub mod kinds;
 pub mod context;
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
 }
