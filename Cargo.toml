@@ -4,3 +4,6 @@ version = "0.1.0"
 authors = ["Davis Wahl <dwahl@signalpath.com>"]
 
 [dependencies]
+bincode = "1.0.1"
+serde_derive = "1.0.66"
+serde = "1.0.66"

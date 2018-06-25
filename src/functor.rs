@@ -1,4 +1,6 @@
 use kind::{Kind};
+use serde;
+use serde::de;
 use context::{Context, ExtractExt, ExtractKind, FromContext, IntoContext, IntoContextExt};
 use kinds;
 
@@ -8,7 +10,9 @@ where
 {
     fn map<A, B, F>(k: Context<K, A>, f: F) -> Context<K, B>
     where
-        F: FnMut(A) -> B;
+        F: FnMut(A) -> B,
+        A: de::DeserializeOwned,
+        B: de::DeserializeOwned+serde::Serialize;
 }
 
 trait KindFunctorExt<K: Kind> {
@@ -16,15 +20,17 @@ trait KindFunctorExt<K: Kind> {
 
     fn map<B, F>(self, f: F) -> Context<K, B>
     where
-        F: FnMut(Self::Item) -> B;
+        F: FnMut(Self::Item) -> B,
+        B: de::DeserializeOwned+serde::Serialize;
 }
 
-impl<K: Kind + Functor<K>, T> KindFunctorExt<K> for Context<K, T> {
+impl<K: Kind + Functor<K>, T: de::DeserializeOwned> KindFunctorExt<K> for Context<K, T> {
     type Item = T;
 
     fn map<B, F>(self, f: F) -> Context<K, B>
     where
         F: FnMut(Self::Item) -> B,
+        B: de::DeserializeOwned+serde::Serialize,
     {
         <K as Functor<K>>::map::<T, B, F>(self, f)
     }
@@ -34,6 +40,8 @@ impl Functor<kinds::Vec> for kinds::Vec {
     fn map<A, B, F>(m: Context<kinds::Vec, A>, f: F) -> Context<kinds::Vec, B>
     where
         F: FnMut(A) -> B,
+        A: de::DeserializeOwned,
+        B: serde::Serialize+de::DeserializeOwned,
     {
         m.extract().into_iter().map(f).collect::<Vec<B>>().into_context()
     }
@@ -43,6 +51,8 @@ impl Functor<kinds::Option> for kinds::Option {
     fn map<A, B, F>(k: Context<kinds::Option, A>, f: F) -> Context<kinds::Option, B>
     where
         F: FnMut(A) -> B,
+        A: de::DeserializeOwned,
+        B: de::DeserializeOwned+serde::Serialize
     {
         k.extract().map(f).into_context()
     }
@@ -62,10 +72,7 @@ mod test {
     #[test]
     fn option_funtor_test() {
         let opt: Context<kinds::Option, i32> = Context::from(Some(1));
-        //let result3 = opt.map(|i| i * 2);
-        println!("opt: {:?}", opt);
-        let result = opt.extract();
-        println!("extracted {:?}", result);
-        assert_eq!(result, Some(2));
+        let opt = opt.map(|i| i * 2);
+        assert_eq!(opt.extract(), Some(2));
     }
 }
