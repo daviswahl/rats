@@ -2,19 +2,18 @@
 
 extern crate test;
 
-
-pub mod hkt;
 pub mod conversions;
 pub mod functor;
+pub mod hkt;
 pub mod instances;
 pub mod kinds;
 
 mod erased;
 #[cfg(test)]
 mod tests {
-    use test::Bencher;
     use conversions::*;
     use functor::FunctorExt;
+    use test::Bencher;
 
     #[bench]
     fn bench_vec_map_native(b: &mut Bencher) {

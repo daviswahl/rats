@@ -1,12 +1,11 @@
-use std::marker::PhantomData;
 use erased::Erased;
-use std::ops::Deref;
+use std::marker::PhantomData;
 
 pub trait HKT {
     fn marker() -> Self;
 }
 
-pub trait Kinded<K: HKT, T> { }
+pub trait Kinded<K: HKT, T> {}
 
 #[must_use]
 pub struct Kind<K, T>
@@ -33,41 +32,53 @@ where
         }
     }
 
-    pub fn unkind(self) -> <Self as Unkind<K,T>>::Out where Self: Unkind<K,T> {
-        <Self as Unkind<K,T>>::unkind(self)
+    pub fn unkind(self) -> <Self as Unkind<K, T>>::Out
+    where
+        Self: Unkind<K, T>,
+    {
+        <Self as Unkind<K, T>>::unkind(self)
     }
 
-    pub fn unkind_ref(&self) -> &<Self as UnkindRef<K,T>>::Out where Self: UnkindRef<K,T> {
-        unimplemented!()
+    pub fn unkind_ref(&self) -> &<Self as UnkindRef<K, T>>::Out
+    where
+        Self: UnkindRef<K, T>,
+    {
+        <Self as UnkindRef<K, T>>::unkind_ref(self)
     }
 
-    pub unsafe fn unwrap<A: Kinded<K,T>>(self) -> A {
+    pub unsafe fn unwrap<A: Kinded<K, T>>(self) -> A {
         self.data.unerase()
     }
-}
 
-impl<K: HKT,T> Deref for Kind<K,T> where Self: Unkind<K,T> {
-    type Target = <Self as Unkind<K,T>>::Out;
-    fn deref(&self) -> &<Self as Deref>::Target {
-        unimplemented!()
+    pub unsafe fn unwrap_ref<A: Kinded<K, T>>(&self) -> &A {
+        (&self.data).unerase_ref()
     }
 }
 
 pub trait Unkind<K: HKT, T> {
-    type Out: Kinded<K,T>;
-    fn unkind(k: Kind<K,T>) -> Self::Out;
+    type Out: Kinded<K, T>;
+    fn unkind(k: Kind<K, T>) -> Self::Out;
 }
 
 pub trait UnkindRef<K: HKT, T> {
-    type Out: Kinded<K,T>;
+    type Out: Kinded<K, T>;
     fn unkind_ref(&self) -> &Self::Out;
 }
+
 #[cfg(test)]
 mod tests {
     use conversions::*;
 
     #[test]
     fn test_must_use() {
-       vec![1,2,3].into_kind();
+        vec![1, 2, 3].into_kind();
+    }
+
+    #[test]
+    fn test_unkind_ref() {
+        let vec = vec![1, 2, 3];
+        let v = vec.clone().into_kind();
+        //let r = v.unkind_ref();
+        //assert_eq!(r, &vec);
     }
 }

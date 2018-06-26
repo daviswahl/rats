@@ -1,6 +1,6 @@
 use conversions::*;
 use functor::Functor;
-use hkt::{Kind, Unkind};
+use hkt::Kind;
 use kinds::vec::VecK;
 
 impl Functor<VecK> for VecK {
@@ -8,6 +8,10 @@ impl Functor<VecK> for VecK {
     where
         F: FnMut(A) -> B,
     {
-        k.unkind().into_iter().map(f).collect::<Vec<B>>().into_kind()
+        k.unkind()
+            .into_iter()
+            .map(f)
+            .collect::<Vec<B>>()
+            .into_kind()
     }
 }

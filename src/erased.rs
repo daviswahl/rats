@@ -15,6 +15,10 @@ impl Erased {
     pub unsafe fn unerase<T: Sized>(self) -> T {
         *Box::from_raw(self.0.cast().as_ptr())
     }
+
+    pub unsafe fn unerase_ref<T: Sized>(&self) -> &T {
+        unimplemented!() // not sure how to do this
+    }
 }
 
 #[cfg(test)]
