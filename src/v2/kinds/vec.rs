@@ -1,5 +1,5 @@
-use v2::hkt::*;
 use v2::conversions::*;
+use v2::hkt::*;
 
 pub struct VecK;
 
@@ -30,4 +30,3 @@ impl<T> IntoKind<VecK, T> for Vec<T> {
 }
 
 impl<T> Kinded<VecK, T> for Vec<T> {}
-

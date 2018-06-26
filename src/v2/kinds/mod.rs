@@ -4,7 +4,7 @@ macro_rules! derive_hkt {
             type C = T;
             type T = $t<U>;
         }
-    }
+    };
 }
 
 pub mod vec;

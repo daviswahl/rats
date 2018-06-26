@@ -31,7 +31,7 @@ where
         Kind {
             kind: K::marker(),
             _marker: PhantomData,
-            data: Erased::erase(k),
+            data: unsafe { Erased::erase(k) },
         }
     }
 
@@ -39,4 +39,3 @@ where
         self.data.unerase()
     }
 }
-

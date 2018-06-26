@@ -13,9 +13,9 @@ mod tests {
     use super::*;
     use test::Bencher;
     use v2::conversions::*;
+    use v2::functor::{Functor, FunctorExt};
     use v2::instances::vec::*;
     use v2::kinds::vec::VecK;
-    use v2::functor::{Functor, FunctorExt};
 
     #[bench]
     fn bench_vec_map_native(b: &mut Bencher) {
@@ -67,6 +67,7 @@ mod tests {
                     .into_kinded()
             });
             let result = t.into_kinded();
+            result
         });
     }
 
@@ -82,7 +83,7 @@ mod tests {
                     .collect::<Vec<String>>()
             });
             let result = t.collect::<Vec<Vec<String>>>();
-            println!("{:?}", result)
+            result
         });
     }
 
@@ -95,6 +96,7 @@ mod tests {
                 range.into_kind().map(|i| i * outer).into_kinded()
             });
             let result = t.into_kinded();
+            result
         });
     }
 
@@ -107,7 +109,7 @@ mod tests {
                 range.into_iter().map(|i| i * outer).collect::<Vec<i64>>()
             });
             let result = t.collect::<Vec<Vec<i64>>>();
-            println!("{:?}", result)
+            result
         });
     }
 }

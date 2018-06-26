@@ -8,7 +8,6 @@ where
         F: FnMut(A) -> B;
 }
 
-
 pub trait FunctorExt<K: HKT> {
     type Item;
 
