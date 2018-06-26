@@ -1,8 +1,8 @@
-use context::{Context, ExtractExt, IntoContextExt};
-use kind::Kind;
-use kinds;
 use serde;
 use serde::de;
+use v1::context::{Context, ExtractExt, IntoContextExt};
+use v1::kind::Kind;
+use v1::kinds;
 
 trait Functor<K>
 where

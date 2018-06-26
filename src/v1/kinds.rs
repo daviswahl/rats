@@ -1,7 +1,7 @@
-use context::{Context, FromContext, IntoContext, NewType};
-use kind;
 use serde::de::DeserializeOwned;
 use std::vec;
+use v1::context::{Context, FromContext, IntoContext, NewType};
+use v1::kind;
 
 #[derive(Debug, Clone)]
 pub struct Vec(vec::Vec<u8>);
