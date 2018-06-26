@@ -174,6 +174,7 @@ mod tests {
         });
     }
 
+    use test::black_box;
     #[bench]
     fn bench_vec_map_from_functor_2(b: &mut Bencher) {
         b.iter(|| {
@@ -182,6 +183,64 @@ mod tests {
                 .map(|i| i * 2)
                 .map(|i| i * 2)
                 .into_kinded()
+        });
+    }
+
+    #[bench]
+    fn bench_vec_map_from_functor_amortized_strings(b: &mut Bencher) {
+        b.iter(|| {
+            let t = vec![1,2,3,4,5].into_kind().map(|outer| {
+                let n = black_box(1000);
+                let range: Vec<i64> = (0..n).collect();
+                range.into_kind()
+                    .map(|i| format!("{}{}", outer, i))
+                    .into_kinded()
+            });
+            let result = t.into_kinded();
+        });
+    }
+
+    #[bench]
+    fn bench_vec_map_native_amortized_strings(b: &mut Bencher) {
+        b.iter(|| {
+            let t = vec![1,2,3,4,5].into_iter().map(|outer| {
+                let n = black_box(1000);
+                let range: Vec<i64> = (0..n).collect();
+                range.into_iter()
+                    .map(|i| format!("{}{}", outer, i))
+                    .collect::<Vec<String>>()
+            });
+            let result = t.collect::<Vec<Vec<String>>>();
+            println!("{:?}", result)
+        });
+    }
+
+    #[bench]
+    fn bench_vec_map_from_functor_amortized_ints(b: &mut Bencher) {
+        b.iter(|| {
+            let t = vec![1,2,3,4,5].into_kind().map(|outer| {
+                let n = black_box(1000);
+                let range: Vec<i64> = (0..n).collect();
+                range.into_kind()
+                    .map(|i| i * outer)
+                    .into_kinded()
+            });
+            let result = t.into_kinded();
+        });
+    }
+
+    #[bench]
+    fn bench_vec_map_native_amortized_ints(b: &mut Bencher) {
+        b.iter(|| {
+            let t = vec![1,2,3,4,5].into_iter().map(|outer| {
+                let n = black_box(1000);
+                let range: Vec<i64> = (0..n).collect();
+                range.into_iter()
+                    .map(|i| i * outer)
+                    .collect::<Vec<i64>>()
+            });
+            let result = t.collect::<Vec<Vec<i64>>>();
+            println!("{:?}", result)
         });
     }
 }
