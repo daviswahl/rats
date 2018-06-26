@@ -19,7 +19,7 @@ impl<T> IntoKinded<VecK, T> for Kind<VecK, T> {
 impl<T> FromKind<VecK, T> for Vec<T> {
     type Out = Vec<T>;
     fn from_kind(k: Kind<VecK, T>) -> Vec<T> {
-        unsafe { k.unwrap::<Self>() }
+        k.reify()
     }
 }
 
@@ -31,18 +31,6 @@ impl<T> IntoKind<VecK, T> for Vec<T> {
 
 impl<T> Kinded<VecK, T> for Vec<T> {}
 
-impl<T> Unkind<VecK, T> for Kind<VecK, T> {
+impl<T> Reify<VecK, T> for Kind<VecK, T> {
     type Out = Vec<T>;
-
-    fn unkind(k: Kind<VecK, T>) -> <Self as Unkind<VecK, T>>::Out {
-        unsafe { k.unwrap() }
-    }
-}
-
-impl<T> UnkindRef<VecK, T> for Kind<VecK, T> {
-    type Out = Vec<T>;
-
-    fn unkind_ref(&self) -> &<Self as UnkindRef<VecK, T>>::Out {
-        unsafe { self.unwrap_ref() }
-    }
 }

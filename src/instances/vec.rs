@@ -8,7 +8,7 @@ impl Functor<VecK> for VecK {
     where
         F: FnMut(A) -> B,
     {
-        k.unkind()
+        k.reify()
             .into_iter()
             .map(f)
             .collect::<Vec<B>>()

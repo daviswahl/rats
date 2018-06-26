@@ -27,7 +27,7 @@ mod tests {
 
     #[bench]
     fn bench_vec_map_from_functor(b: &mut Bencher) {
-        b.iter(|| vec![1, 2, 3].into_kind().map(|i| i * 2).into_kinded());
+        b.iter(|| vec![1, 2, 3].into_kind().map(|i| i * 2).reify());
     }
 
     #[bench]
@@ -49,7 +49,7 @@ mod tests {
                 .into_kind()
                 .map(|i| i * 2)
                 .map(|i| i * 2)
-                .into_kinded()
+                .reify()
         });
     }
 
@@ -62,9 +62,9 @@ mod tests {
                 range
                     .into_kind()
                     .map(|i| format!("{}{}", outer, i))
-                    .into_kinded()
+                    .reify()
             });
-            let result = t.into_kinded();
+            let result = t.reify();
             result
         });
     }
@@ -91,9 +91,9 @@ mod tests {
             let t = vec![1, 2, 3, 4, 5].into_kind().map(|outer| {
                 let n = black_box(1000);
                 let range: Vec<i64> = (0..n).collect();
-                range.into_kind().map(|i| i * outer).into_kinded()
+                range.into_kind().map(|i| i * outer).reify()
             });
-            let result = t.into_kinded();
+            let result = t.reify();
             result
         });
     }

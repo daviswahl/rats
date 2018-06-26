@@ -8,6 +8,7 @@ pub trait HKT {
 pub trait Kinded<K: HKT, T> {}
 
 #[must_use]
+#[allow(dead_code)]
 pub struct Kind<K, T>
 where
     K: HKT,
@@ -28,41 +29,37 @@ where
         Kind {
             kind: K::marker(),
             _marker: PhantomData,
-            data: unsafe { Erased::erase(k) },
+            data: Erased::erase(k)
         }
     }
 
-    pub fn unkind(self) -> <Self as Unkind<K, T>>::Out
+    pub fn reify(self) -> <Self as Reify<K, T>>::Out
     where
-        Self: Unkind<K, T>,
+        Self: Reify<K, T>,
     {
-        <Self as Unkind<K, T>>::unkind(self)
+        unsafe {
+            self.data.reify()
+        }
     }
 
-    pub fn unkind_ref(&self) -> &<Self as UnkindRef<K, T>>::Out
+    pub fn reify_as_ref(&self) -> &<Self as Reify<K, T>>::Out
     where
-        Self: UnkindRef<K, T>,
+        Self: Reify<K, T>,
     {
-        <Self as UnkindRef<K, T>>::unkind_ref(self)
+        unsafe {
+            self.data.reify_as_ref()
+        }
     }
 
-    pub unsafe fn unwrap<A: Kinded<K, T>>(self) -> A {
-        self.data.unerase()
-    }
-
-    pub unsafe fn unwrap_ref<A: Kinded<K, T>>(&self) -> &A {
-        (&self.data).unerase_ref()
+    pub fn reify_as_mut_ref(&mut self) -> &mut <Self as Reify<K,T>>::Out
+    where Self: Reify<K,T>
+    {
+        unsafe { self.data.reify_as_mut_ref() }
     }
 }
 
-pub trait Unkind<K: HKT, T> {
+pub trait Reify<K: HKT, T> {
     type Out: Kinded<K, T>;
-    fn unkind(k: Kind<K, T>) -> Self::Out;
-}
-
-pub trait UnkindRef<K: HKT, T> {
-    type Out: Kinded<K, T>;
-    fn unkind_ref(&self) -> &Self::Out;
 }
 
 #[cfg(test)]
