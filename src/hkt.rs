@@ -1,13 +1,12 @@
 use std::marker::PhantomData;
-use v2::erased::Erased;
+use erased::Erased;
+use std::ops::Deref;
 
 pub trait HKT {
     fn marker() -> Self;
 }
 
-pub trait Kinded<K: HKT, T> {
-    type Kind = K;
-}
+pub trait Kinded<K: HKT, T> { }
 
 #[must_use]
 pub struct Kind<K, T>
@@ -38,8 +37,19 @@ where
         <Self as Unkind<K,T>>::unkind(self)
     }
 
+    pub fn unkind_ref(&self) -> &<Self as UnkindRef<K,T>>::Out where Self: UnkindRef<K,T> {
+        unimplemented!()
+    }
+
     pub unsafe fn unwrap<A: Kinded<K,T>>(self) -> A {
         self.data.unerase()
+    }
+}
+
+impl<K: HKT,T> Deref for Kind<K,T> where Self: Unkind<K,T> {
+    type Target = <Self as Unkind<K,T>>::Out;
+    fn deref(&self) -> &<Self as Deref>::Target {
+        unimplemented!()
     }
 }
 
@@ -48,9 +58,13 @@ pub trait Unkind<K: HKT, T> {
     fn unkind(k: Kind<K,T>) -> Self::Out;
 }
 
+pub trait UnkindRef<K: HKT, T> {
+    type Out: Kinded<K,T>;
+    fn unkind_ref(&self) -> &Self::Out;
+}
 #[cfg(test)]
 mod tests {
-    use v2::conversions::*;
+    use conversions::*;
 
     #[test]
     fn test_must_use() {

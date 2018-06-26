@@ -1,20 +1,17 @@
 pub mod hkt;
-
 pub mod erased;
-
 pub mod conversions;
 pub mod functor;
-
 pub mod instances;
 pub mod kinds;
 
 #[cfg(test)]
 mod tests {
     use test::Bencher;
-    use v2::conversions::*;
-    use v2::functor::{Functor, FunctorExt};
-    use v2::instances::vec::*;
-    use v2::kinds::vec::VecK;
+    use conversions::*;
+    use functor::{Functor, FunctorExt};
+    use instances::vec::*;
+    use kinds::vec::VecK;
 
     #[bench]
     fn bench_vec_map_native(b: &mut Bencher) {

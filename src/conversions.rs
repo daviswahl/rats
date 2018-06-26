@@ -1,4 +1,4 @@
-use v2::hkt::*;
+use hkt::*;
 pub trait IntoKind<K: HKT, T>
 where
     Self: Kinded<K, T>,
@@ -19,7 +19,7 @@ pub trait IntoKinded<K: HKT, T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use v2::functor::FunctorExt;
+    use functor::FunctorExt;
 
     #[test]
     fn into_kind() {
