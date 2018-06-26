@@ -3,7 +3,6 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::marker;
 use v1::kind::Kind;
-use v1::kinds;
 
 #[derive(Debug, Clone)]
 pub struct Context<K: Kind, I: DeserializeOwned> {
@@ -119,6 +118,7 @@ pub trait FromContext {
 #[cfg(test)]
 mod test {
     use super::*;
+    use v1::kinds;
 
     #[test]
     fn extractor_test() {

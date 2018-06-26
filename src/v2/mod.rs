@@ -10,7 +10,6 @@ pub mod kinds;
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use test::Bencher;
     use v2::conversions::*;
     use v2::functor::{Functor, FunctorExt};

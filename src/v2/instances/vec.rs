@@ -1,6 +1,6 @@
 use v2::conversions::*;
 use v2::functor::Functor;
-use v2::hkt::Kind;
+use v2::hkt::{Kind, Unkind};
 use v2::kinds::vec::VecK;
 
 impl Functor<VecK> for VecK {
@@ -9,8 +9,7 @@ impl Functor<VecK> for VecK {
         F: FnMut(A) -> B,
     {
         unsafe {
-            let k: Vec<A> = k.unwrap();
-            k.into_iter().map(f).collect::<Vec<B>>().into_kind()
+            k.unkind().into_iter().map(f).collect::<Vec<B>>().into_kind()
         }
     }
 }

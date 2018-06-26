@@ -1,6 +1,4 @@
-use std::any::Any;
 use std::marker::PhantomData;
-use std::ops::Deref;
 use v2::erased::Erased;
 
 pub trait HKT {
@@ -11,22 +9,23 @@ pub trait Kinded<K: HKT, T> {
     type Kind = K;
 }
 
-pub struct Kind<K, A>
+#[must_use]
+pub struct Kind<K, T>
 where
     K: HKT,
 {
     kind: K,
-    _marker: PhantomData<*const A>,
+    _marker: PhantomData<*const T>,
     data: Erased,
 }
 
-impl<K, A> Kind<K, A>
+impl<K, T> Kind<K, T>
 where
     K: HKT,
 {
-    pub fn new<T>(k: T) -> Kind<K, A>
+    pub fn new<A>(k: A) -> Kind<K, T>
     where
-        T: Kinded<K, A>,
+        A: Kinded<K, T>,
     {
         Kind {
             kind: K::marker(),
@@ -35,7 +34,26 @@ where
         }
     }
 
-    pub unsafe fn unwrap<T: Sized>(self) -> T {
+    pub fn unkind(self) -> <Self as Unkind<K,T>>::Out where Self: Unkind<K,T> {
+        <Self as Unkind<K,T>>::unkind(self)
+    }
+
+    pub unsafe fn unwrap<A: Kinded<K,T>>(self) -> A {
         self.data.unerase()
+    }
+}
+
+pub trait Unkind<K: HKT, T> {
+    type Out: Kinded<K,T>;
+    fn unkind(k: Kind<K,T>) -> Self::Out;
+}
+
+#[cfg(test)]
+mod tests {
+    use v2::conversions::*;
+
+    #[test]
+    fn test_must_use() {
+       vec![1,2,3].into_kind();
     }
 }
