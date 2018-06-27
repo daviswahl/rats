@@ -1,3 +1,4 @@
+use std::mem;
 use std::ptr;
 
 /// Erased "erases" the type of a value by boxing it into the heap and then
@@ -9,36 +10,50 @@ use std::ptr;
 /// I believe it is desirable and possible to implement drop for this struct, but it's a bit difficult because
 /// we have know way of knowing the type of the erased value from the drop callsite. I think we can
 /// maybe get around this by tracking the size and alignment of the type?
-pub(crate) struct Erased(ptr::NonNull<()>);
+pub struct Erased {
+    ptr: ptr::NonNull<()>,
+    /// We need to store how to drop this. We do so upon creation.
+    drop_impl: Option<Box<Fn(&mut Erased)>>,
+}
 
 impl Erased {
     // I think this is safe, but will leak memory if the caller doesn't unerase or consume self.
     // But I guess leaking memory is not technically "unsafe".
     pub fn erase<T: Sized>(t: T) -> Erased {
-        let ptr = unsafe {
-            ptr::NonNull::new_unchecked(Box::into_raw(Box::new(t)))
-        };
-        Erased(ptr.cast())
+        let ptr = unsafe { ptr::NonNull::new_unchecked(Box::into_raw(Box::new(t))) };
+        Erased {
+            ptr: ptr.cast(),
+            drop_impl: Some(Box::new(|s: &mut Erased| unsafe {
+                ptr::drop_in_place(s.ptr.cast::<T>().as_ptr());
+            })),
+        }
     }
 
     // unsafe because it is the callers responsibility to ask for the correct type.
-    pub unsafe fn reify<T: Sized>(self) -> T {
-        *Box::from_raw(self.0.cast().as_ptr())
+    pub unsafe fn reify<T: Sized>(mut self) -> T {
+        self.drop_impl.take();
+        *Box::from_raw(self.ptr.cast().as_ptr())
     }
 
     // TODO: not sure how to get this right.
     pub unsafe fn reify_as_ref<T: Sized>(&self) -> &T {
-        unimplemented!()
+        &*self.ptr.cast().as_ptr() // I think this should work
     }
 
     // TODO: not sure how to get this right.
     pub unsafe fn reify_as_mut_ref<T: Sized>(&mut self) -> &mut T {
-        unimplemented!()
+        &mut *self.ptr.cast().as_ptr()
     }
 
     // unsafe because it is the callers responsibility to ask for the correct type.
     pub unsafe fn drop<T: Sized>(self) {
         self.reify::<T>();
+    }
+}
+
+impl Drop for Erased {
+    fn drop(&mut self) {
+        self.drop_impl.take().map(|drop_impl| drop_impl(self));
     }
 }
 
@@ -50,10 +65,22 @@ mod tests {
     fn test_erase<T: Clone + PartialEq + Debug>(t: T) {
         let copy = t.clone();
         let erased = Erased::erase(t);
+        erased.ptr.cast::<T>();
         unsafe {
             assert_eq!(copy, erased.reify());
         }
     }
+    #[test]
+    fn drop_test() {
+        {
+            let f = Erased::erase(vec![1, 2, 3]);
+        }
+        {
+            let f = Erased::erase(vec![1, 2, 3]);
+            unsafe { f.reify::<Vec<i32>>() };
+        }
+    }
+
     #[test]
     fn erasure_1() {
         test_erase(vec![1, 2, 3]);

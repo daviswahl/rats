@@ -1,4 +1,3 @@
-use erased::Erased;
 use std::marker::PhantomData;
 
 pub trait HKT {
@@ -7,65 +6,35 @@ pub trait HKT {
 
 pub trait Kinded<K: HKT, T> {}
 
-#[must_use]
-#[allow(dead_code)]
-pub struct Kind<K, T>
-where
-    K: HKT,
-{
-    kind: K,
-    _marker: PhantomData<*const T>,
-    data: Erased,
-}
-
-impl<K, T> Kind<K, T>
-where
-    K: HKT,
-{
-    pub fn new<A>(k: A) -> Kind<K, T>
-    where
-        A: Kinded<K, T>,
-    {
-        Kind {
-            kind: K::marker(),
-            _marker: PhantomData,
-            data: Erased::erase(k)
-        }
-    }
-
-    pub fn reify(self) -> <Self as Reify<K, T>>::Out
-    where
-        Self: Reify<K, T>,
-    {
-        unsafe {
-            self.data.reify()
-        }
-    }
-
-    pub fn reify_as_ref(&self) -> &<Self as Reify<K, T>>::Out
-    where
-        Self: Reify<K, T>,
-    {
-        unsafe {
-            self.data.reify_as_ref()
-        }
-    }
-
-    pub fn reify_as_mut_ref(&mut self) -> &mut <Self as Reify<K,T>>::Out
-    where Self: Reify<K,T>
-    {
-        unsafe { self.data.reify_as_mut_ref() }
-    }
-}
-
 pub trait Reify<K: HKT, T> {
     type Out: Kinded<K, T>;
 }
 
+//macro_rules! derive_hkt {
+//    ($t:ident) => {
+//        impl HKT for $tK {
+//            fn marker() -> $tK {
+//                $tK
+//            }
+//        }
+//
+//        impl<T> Kinded<$tK, T> for $t<T> {}
+//
+//        impl<T> Reify<$tK, T> for ::kind::Kind<$tK, T> {
+//            type Out = $t<T>;
+//        }
+//    }
+//}
+
 #[cfg(test)]
 mod tests {
+    use super::*;
     use conversions::*;
 
+    #[test]
+    fn test_kinded() {
+        let f = vec![1, 2, 3];
+    }
     #[test]
     fn test_must_use() {
         vec![1, 2, 3].into_kind();
@@ -77,5 +46,13 @@ mod tests {
         let v = vec.clone().into_kind();
         //let r = v.unkind_ref();
         //assert_eq!(r, &vec);
+    }
+
+    #[test]
+    fn test_macro() {
+        //derive_hkt!(Option);
+
+        //let f = Some(1).into_kind();
+        //assert_eq!(f.reify(), Some(1))
     }
 }

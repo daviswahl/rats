@@ -1,4 +1,5 @@
-use hkt::{Kind, HKT};
+use hkt::HKT;
+use kind::Kind;
 pub trait Functor<K>
 where
     K: HKT,

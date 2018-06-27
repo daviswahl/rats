@@ -6,6 +6,7 @@ pub mod conversions;
 pub mod functor;
 pub mod hkt;
 pub mod instances;
+pub mod kind;
 pub mod kinds;
 
 mod erased;
@@ -13,6 +14,7 @@ mod erased;
 mod tests {
     use conversions::*;
     use functor::FunctorExt;
+    use hkt::Kinded;
     use test::Bencher;
 
     #[bench]
@@ -26,7 +28,7 @@ mod tests {
     }
 
     #[bench]
-    fn bench_vec_map_from_functor(b: &mut Bencher) {
+    fn bench_vec_map_from_functor_1(b: &mut Bencher) {
         b.iter(|| vec![1, 2, 3].into_kind().map(|i| i * 2).reify());
     }
 
@@ -59,10 +61,7 @@ mod tests {
             let t = vec![1, 2, 3, 4, 5].into_kind().map(|outer| {
                 let n = black_box(1000);
                 let range: Vec<i64> = (0..n).collect();
-                range
-                    .into_kind()
-                    .map(|i| format!("{}{}", outer, i))
-                    .reify()
+                range.into_kind().map(|i| format!("{}{}", outer, i)).reify()
             });
             let result = t.reify();
             result

@@ -1,19 +1,20 @@
-use hkt::*;
-pub trait IntoKind<K: HKT, T>
+use hkt::{Kinded, HKT};
+use kind::Kind;
+
+pub trait KindedExt<K: HKT, T>
 where
     Self: Kinded<K, T>,
 {
     fn into_kind(self) -> Kind<K, T>;
 }
 
-pub trait FromKind<K: HKT, T> {
-    type Out: Kinded<K, T>;
-    fn from_kind(k: Kind<K, T>) -> Self::Out;
-}
-
-pub trait IntoKinded<K: HKT, T> {
-    type Out: Kinded<K, T>;
-    fn into_kinded(self) -> Self::Out;
+impl<K: HKT, T, Knd> KindedExt<K, T> for Knd
+where
+    Knd: Kinded<K, T>,
+{
+    fn into_kind(self) -> Kind<K, T> {
+        Kind::new(self)
+    }
 }
 
 #[cfg(test)]
@@ -24,14 +25,13 @@ mod tests {
     #[test]
     fn into_kind() {
         let kind = vec![1, 2, 3].into_kind();
-        assert_eq!(Vec::from_kind(kind), vec![1, 2, 3]);
+        assert_eq!(kind.reify(), vec![1, 2, 3]);
     }
 
     #[test]
     fn test_functor() {
         let kind = vec![1, 2, 3].into_kind();
-
         let result = kind.map(|i| i * 2);
-        assert_eq!(result.into_kinded(), vec![2, 4, 6]);
+        assert_eq!(result.reify(), vec![2, 4, 6]);
     }
 }
