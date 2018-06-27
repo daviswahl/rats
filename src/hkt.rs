@@ -1,5 +1,4 @@
 pub trait HKT {
-    fn marker() -> Self;
 }
 
 pub trait Kinded<K: HKT, T> {}

@@ -14,8 +14,10 @@ mod erased;
 #[cfg(test)]
 mod tests {
     use conversions::*;
-    use functor::FunctorExt;
+    use functor::KindFunctorExt;
     use test::Bencher;
+    use kind::KindExt;
+    use kind::Kinded;
 
     #[bench]
     fn bench_vec_map_native(b: &mut Bencher) {

@@ -1,26 +1,12 @@
 use hkt::{Kinded, HKT};
 use kind::Kind;
 
-pub trait KindedExt<K: HKT, T>
-where
-    Self: Kinded<K, T>,
-{
-    fn into_kind(self) -> Kind<K, T>;
-}
-
-impl<K: HKT, T, Knd> KindedExt<K, T> for Knd
-where
-    Knd: Kinded<K, T>,
-{
-    fn into_kind(self) -> Kind<K, T> {
-        Kind::new(self)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use functor::FunctorExt;
+    use functor::KindFunctorExt;
+    use kind::Kinded;
+    use kind::KindExt;
 
     #[test]
     fn into_kind() {

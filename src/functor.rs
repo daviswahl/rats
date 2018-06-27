@@ -1,32 +1,22 @@
 use hkt::HKT;
 use kind::Kind;
-pub trait Functor<K>
-where
-    K: HKT,
-{
-    fn map<F, A, B>(k: Kind<K, A>, f: F) -> Kind<K, B>
-    where
-        F: FnMut(A) -> B;
+
+pub trait Functor<K: HKT> {
+    fn map<A,B, F>(a: Kind<K, A>, f: F) -> Kind<K,B>
+        where F: Fn(A) -> B;
 }
 
-pub trait FunctorExt<K: HKT> {
+pub trait KindFunctorExt<K: HKT> where K: Functor<K> {
     type Item;
-
-    fn map<B, F>(self, f: F) -> Kind<K, B>
-    where
-        F: FnMut(Self::Item) -> B;
+    fn map<B,F>(self, f: F) -> Kind<K,B> where
+        F: Fn(Self::Item) -> B;
 }
 
-impl<K: HKT, T> FunctorExt<K> for Kind<K, T>
-where
-    K: Functor<K>,
-{
+impl<K, T> KindFunctorExt<K> for Kind<K, T> where K: HKT+Functor<K> {
     type Item = T;
 
-    fn map<B, F>(self, f: F) -> Kind<K, B>
-    where
-        F: FnMut(Self::Item) -> B,
-    {
-        <K as Functor<K>>::map(self, f)
+    fn map<B, F>(self, f: F) -> Kind<K, B> where
+        F: Fn(Self::Item) -> B {
+        K::map(self, f)
     }
 }
