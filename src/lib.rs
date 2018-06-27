@@ -8,6 +8,7 @@ pub mod hkt;
 pub mod instances;
 pub mod kind;
 pub mod kinds;
+pub mod scratch;
 
 mod erased;
 #[cfg(test)]
