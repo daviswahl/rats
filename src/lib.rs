@@ -14,7 +14,6 @@ mod erased;
 mod tests {
     use conversions::*;
     use functor::FunctorExt;
-    use hkt::Kinded;
     use test::Bencher;
 
     #[bench]

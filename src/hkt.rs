@@ -1,5 +1,3 @@
-use std::marker::PhantomData;
-
 pub trait HKT {
     fn marker() -> Self;
 }
@@ -28,26 +26,6 @@ pub trait Reify<K: HKT, T> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use conversions::*;
-
-    #[test]
-    fn test_kinded() {
-        let f = vec![1, 2, 3];
-    }
-    #[test]
-    fn test_must_use() {
-        vec![1, 2, 3].into_kind();
-    }
-
-    #[test]
-    fn test_unkind_ref() {
-        let vec = vec![1, 2, 3];
-        let v = vec.clone().into_kind();
-        //let r = v.unkind_ref();
-        //assert_eq!(r, &vec);
-    }
-
     #[test]
     fn test_macro() {
         //derive_hkt!(Option);

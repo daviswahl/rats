@@ -1,7 +1,7 @@
 use erased::Erased;
 use hkt::*;
 use std::marker::PhantomData;
-#[must_use]
+
 #[allow(dead_code)]
 pub struct Kind<K, T>
 where

@@ -1,4 +1,3 @@
-use std::mem;
 use std::ptr;
 
 /// Erased "erases" the type of a value by boxing it into the heap and then
@@ -35,25 +34,18 @@ impl Erased {
         *Box::from_raw(self.ptr.cast().as_ptr())
     }
 
-    // TODO: not sure how to get this right.
     pub unsafe fn reify_as_ref<T: Sized>(&self) -> &T {
-        &*self.ptr.cast().as_ptr() // I think this should work
+        &*self.ptr.cast().as_ptr()
     }
 
-    // TODO: not sure how to get this right.
     pub unsafe fn reify_as_mut_ref<T: Sized>(&mut self) -> &mut T {
         &mut *self.ptr.cast().as_ptr()
-    }
-
-    // unsafe because it is the callers responsibility to ask for the correct type.
-    pub unsafe fn drop<T: Sized>(self) {
-        self.reify::<T>();
     }
 }
 
 impl Drop for Erased {
     fn drop(&mut self) {
-        self.drop_impl.take().map(|drop_impl| drop_impl(self));
+        if let Some(func) = self.drop_impl.take() { func(self) }
     }
 }
 
@@ -71,9 +63,10 @@ mod tests {
         }
     }
     #[test]
+    #[allow(unused_variables)]
     fn drop_test() {
         {
-            let f = Erased::erase(vec![1, 2, 3]);
+            Erased::erase(vec![1, 2, 3]);
         }
         {
             let f = Erased::erase(vec![1, 2, 3]);
