@@ -10,7 +10,6 @@ pub mod kind;
 pub mod kinds;
 pub mod scratch;
 
-mod erased;
 #[cfg(test)]
 mod tests {
     use conversions::*;

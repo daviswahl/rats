@@ -1,4 +1,3 @@
-use erased::Erased;
 use hkt::*;
 use std::marker::PhantomData;
 
