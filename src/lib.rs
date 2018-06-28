@@ -2,7 +2,7 @@
 
 extern crate test;
 
-pub mod conversions;
+pub mod function_k;
 pub mod functor;
 pub mod hkt;
 pub mod instances;
@@ -12,11 +12,10 @@ pub mod scratch;
 
 #[cfg(test)]
 mod tests {
-    use conversions::*;
     use functor::KindFunctorExt;
-    use test::Bencher;
     use kind::KindExt;
     use kind::Kinded;
+    use test::Bencher;
 
     #[bench]
     fn bench_vec_map_native(b: &mut Bencher) {

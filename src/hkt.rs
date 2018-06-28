@@ -1,5 +1,4 @@
-pub trait HKT {
-}
+pub trait HKT {}
 
 pub trait Kinded<K: HKT, T> {}
 

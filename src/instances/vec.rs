@@ -1,11 +1,13 @@
-use conversions::*;
 use functor::Functor;
 use kind::Kind;
-use kind::VecKind;
+use kind::{VecKind};
 use kind::KindExt;
 
 impl Functor<VecKind> for VecKind {
-    fn map<A, B, F>(a: Kind<VecKind, A>, f: F) -> Kind<VecKind, F::Output> where F: Fn(A) -> B {
+    fn map<F, A, B>(a: Kind<VecKind, A>, f: F) -> Kind<VecKind, F::Output>
+    where
+        F: Fn(A) -> B,
+    {
         Kind::new(a.reify().into_iter().map(f).collect::<Vec<B>>())
     }
 }
@@ -15,6 +17,7 @@ mod tests {
     use super::*;
     use functor::KindFunctorExt;
     use kind::Kinded;
+
     #[test]
     fn test_vec_map_from_functor_1() {
         let result = vec![1, 2, 3].into_kind().map(|i| i * 2).reify();
