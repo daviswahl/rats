@@ -1,6 +1,6 @@
 use hkt::HKT;
 use kind::Kind;
-use kind::{KindExt, Kinded};
+use kind::{Kinded, Reify};
 use kind::{OptionKind, VecKind};
 
 trait FunctionK<F: HKT, G: HKT> {
@@ -17,7 +17,7 @@ impl FunctionK<OptionKind, VecKind> for OptionKind {
     }
 }
 
-trait FunctionKExt<K, A>
+trait FunctionKKindExt<K, A>
 where
     K: HKT,
 {
@@ -26,7 +26,7 @@ where
         K: FunctionK<K, G>;
 }
 
-impl<K, A> FunctionKExt<K, A> for Kind<K, A>
+impl<K, A> FunctionKKindExt<K, A> for Kind<K, A>
 where
     K: HKT,
 {

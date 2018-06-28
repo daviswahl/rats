@@ -1,7 +1,7 @@
 use functor::Functor;
 use kind::Kind;
-use kind::{VecKind};
-use kind::KindExt;
+use kind::Reify;
+use kind::VecKind;
 
 impl Functor<VecKind> for VecKind {
     fn map<F, A, B>(a: Kind<VecKind, A>, f: F) -> Kind<VecKind, F::Output>

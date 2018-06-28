@@ -13,8 +13,8 @@ pub mod scratch;
 #[cfg(test)]
 mod tests {
     use functor::KindFunctorExt;
-    use kind::KindExt;
     use kind::Kinded;
+    use kind::Reify;
     use test::Bencher;
 
     #[bench]

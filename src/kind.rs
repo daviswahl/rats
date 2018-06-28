@@ -8,7 +8,7 @@ pub enum Kind<K: HKT, A> {
     __MARKER(PhantomData<*const K>),
 }
 
-pub trait KindExt<K: HKT, A> {
+pub trait Reify<K: HKT, A> {
     type Type;
     fn reify(self) -> Self::Type;
     fn new(t: Self::Type) -> Kind<K, A>;
@@ -28,8 +28,9 @@ impl<T> Kinded<VecKind, T> for Vec<T> {
         Kind::new(self)
     }
 }
+
 #[allow(unreachable_patterns)]
-impl<T> KindExt<VecKind, T> for Kind<VecKind, T> {
+impl<T> Reify<VecKind, T> for Kind<VecKind, T> {
     type Type = Vec<T>;
     fn reify(self) -> Vec<T> {
         match self {
@@ -44,7 +45,7 @@ impl<T> KindExt<VecKind, T> for Kind<VecKind, T> {
 }
 
 #[allow(unreachable_patterns)]
-impl<T> KindExt<OptionKind, T> for Kind<OptionKind, T> {
+impl<T> Reify<OptionKind, T> for Kind<OptionKind, T> {
     type Type = Option<T>;
 
     fn reify(self) -> Self::Type {
