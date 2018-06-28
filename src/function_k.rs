@@ -1,6 +1,6 @@
-use hkt::HKT;
 use kind::Kind;
-use kind::{Kinded, Reify};
+use kind::HKT;
+use kind::{IntoKind, Reify};
 use kind::{OptionKind, VecKind};
 
 trait FunctionK<F: HKT, G: HKT> {
@@ -17,7 +17,7 @@ impl FunctionK<OptionKind, VecKind> for OptionKind {
     }
 }
 
-trait FunctionKKindExt<K, A>
+trait KindFunctionKExt<K, A>
 where
     K: HKT,
 {
@@ -26,7 +26,7 @@ where
         K: FunctionK<K, G>;
 }
 
-impl<K, A> FunctionKKindExt<K, A> for Kind<K, A>
+impl<K, A> KindFunctionKExt<K, A> for Kind<K, A>
 where
     K: HKT,
 {
@@ -40,7 +40,7 @@ where
 
 #[test]
 fn test() {
-    let s: Kind<OptionKind, i32> = Kind::new(Some(1));
+    let s: Kind<OptionKind, i32> = Some(1).into_kind();
     let r = s.map_kind::<VecKind>();
     assert_eq!(r.reify(), vec![1]);
 }

@@ -4,16 +4,14 @@ extern crate test;
 
 pub mod function_k;
 pub mod functor;
-pub mod hkt;
 pub mod instances;
 pub mod kind;
-pub mod kinds;
 pub mod scratch;
 
 #[cfg(test)]
 mod tests {
     use functor::KindFunctorExt;
-    use kind::Kinded;
+    use kind::IntoKind;
     use kind::Reify;
     use test::Bencher;
 

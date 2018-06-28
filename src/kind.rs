@@ -1,5 +1,6 @@
-use hkt::*;
 use std::marker::PhantomData;
+
+pub trait HKT {}
 
 #[allow(dead_code)]
 pub enum Kind<K: HKT, A> {
@@ -9,54 +10,65 @@ pub enum Kind<K: HKT, A> {
 }
 
 pub trait Reify<K: HKT, A> {
-    type Type;
-    fn reify(self) -> Self::Type;
-    fn new(t: Self::Type) -> Kind<K, A>;
+    type Out;
+    fn reify(self) -> Self::Out;
 }
 
-pub trait Kinded<K: HKT, T> {
+pub trait IntoKind<K: HKT, T> {
     type Kind: HKT;
-    type Out;
     fn into_kind(self) -> Kind<K, T>;
 }
 
-impl<T> Kinded<VecKind, T> for Vec<T> {
-    type Kind = VecKind;
-    type Out = Vec<T>;
+//macro_rules! derive_hkt {
+//    ($t:ident) => {
+//        impl HKT for $tK {
+//            fn marker() -> $tK {
+//                $tK
+//            }
+//        }
+//
+//        impl<T> Kinded<$tK, T> for $t<T> {}
+//
+//        impl<T> Reify<$tK, T> for ::kind::Kind<$tK, T> {
+//            type Out = $t<T>;
+//        }
+//    }
+//}
 
+impl<T> IntoKind<VecKind, T> for Vec<T> {
+    type Kind = VecKind;
     fn into_kind(self) -> Kind<VecKind, T> {
-        Kind::new(self)
+        Kind::Vec::<VecKind, T>(self)
+    }
+}
+
+impl<T> IntoKind<OptionKind, T> for Option<T> {
+    type Kind = OptionKind;
+    fn into_kind(self) -> Kind<OptionKind, T> {
+        Kind::Option::<OptionKind, T>(self)
     }
 }
 
 #[allow(unreachable_patterns)]
 impl<T> Reify<VecKind, T> for Kind<VecKind, T> {
-    type Type = Vec<T>;
+    type Out = Vec<T>;
     fn reify(self) -> Vec<T> {
         match self {
             Kind::Vec(t) => t,
             _ => unreachable!(),
         }
     }
-
-    fn new(t: Vec<T>) -> Kind<VecKind, T> {
-        Kind::Vec::<VecKind, T>(t)
-    }
 }
 
 #[allow(unreachable_patterns)]
 impl<T> Reify<OptionKind, T> for Kind<OptionKind, T> {
-    type Type = Option<T>;
+    type Out = Option<T>;
 
-    fn reify(self) -> Self::Type {
+    fn reify(self) -> Self::Out {
         match self {
             Kind::Option(t) => t,
             _ => unreachable!(),
         }
-    }
-
-    fn new(t: Self::Type) -> Kind<OptionKind, T> {
-        Kind::Option(t)
     }
 }
 

@@ -1,5 +1,5 @@
-use hkt::HKT;
 use kind::Kind;
+use kind::HKT;
 pub trait Functor<K: HKT> {
     fn map<F, A, B>(a: Kind<K, A>, f: F) -> Kind<K, B>
     where

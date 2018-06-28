@@ -1,4 +1,5 @@
 use functor::Functor;
+use kind::IntoKind;
 use kind::Kind;
 use kind::Reify;
 use kind::VecKind;
@@ -8,7 +9,7 @@ impl Functor<VecKind> for VecKind {
     where
         F: Fn(A) -> B,
     {
-        Kind::new(a.reify().into_iter().map(f).collect::<Vec<B>>())
+        a.reify().into_iter().map(f).collect::<Vec<B>>().into_kind()
     }
 }
 
@@ -16,7 +17,7 @@ impl Functor<VecKind> for VecKind {
 mod tests {
     use super::*;
     use functor::KindFunctorExt;
-    use kind::Kinded;
+    use kind::IntoKind;
 
     #[test]
     fn test_vec_map_from_functor_1() {
