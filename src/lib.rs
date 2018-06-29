@@ -1,20 +1,22 @@
 #![feature(test)]
+#![feature(associated_type_defaults)]
+#![feature(tool_attributes)]
 
 extern crate test;
 
+pub mod applicative;
 pub mod function_k;
 pub mod functor;
+pub mod id;
 pub mod instances;
 pub mod kind;
-pub mod applicative;
 pub mod kinds;
-pub mod id;
 
 #[cfg(test)]
 mod tests {
     use function_k::KindFunctionKExt;
     use functor::KindFunctorExt;
-    use kind::{IntoKind,Reify};
+    use kind::{IntoKind, Reify};
     use kinds::VecKind;
     use test::{black_box, Bencher};
 

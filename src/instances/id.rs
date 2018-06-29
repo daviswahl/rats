@@ -1,18 +1,27 @@
-use id::{Id,IdExt};
-use kinds::IdKind;
-use kind::{Kind,IntoKind, Reify};
-use functor::Functor;
 use applicative::Applicative;
+use functor::Functor;
+use id::{Id, IdExt};
+use kind::{IntoKind, Kind, Reify};
+use kinds::IdKind;
 
 impl Applicative<IdKind> for IdKind {
     fn point<A>(a: A) -> Kind<IdKind, A> {
         Id(a).into_kind()
     }
+
+    fn ap<A, B, F>(fa: Kind<IdKind, A>, ff: Kind<IdKind, F>) -> Kind<IdKind, B>
+    where
+        F: FnOnce(A) -> B,
+    {
+        unimplemented!()
+    }
 }
 
 impl Functor<IdKind> for IdKind {
-    fn map<F,A,B>(a: Kind<IdKind, A>, f: F) -> Kind<IdKind, B>
-    where F: Fn(A) -> B {
+    fn map<F, A, B>(a: Kind<IdKind, A>, f: F) -> Kind<IdKind, B>
+    where
+        F: Fn(A) -> B,
+    {
         f(a.reify().take()).id().into_kind()
     }
 }
