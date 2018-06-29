@@ -1,4 +1,5 @@
 use std::marker::PhantomData;
+use id::Id;
 
 pub trait HKT {}
 
@@ -7,6 +8,7 @@ pub trait HKT {}
 pub enum Kind<K: HKT, A> {
     Vec(Vec<A>),
     Option(Option<A>),
+    Id(Id<A>),
     // Is this valid? also need to understand which pointer type to use here
     __MARKER(PhantomData<*const K>),
 }

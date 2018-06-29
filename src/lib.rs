@@ -8,6 +8,7 @@ pub mod instances;
 pub mod kind;
 pub mod applicative;
 pub mod kinds;
+pub mod id;
 
 #[cfg(test)]
 mod tests {
