@@ -29,3 +29,37 @@ where
         K::map(self, f)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use kind::{IntoKind, OptionKind, Reify, VecKind};
+    use std::fmt::Debug;
+
+    fn convert_to_string<F>(fa: Kind<F, i32>) -> Kind<F, String>
+    where
+        F: HKT + Functor<F>,
+    {
+        fa.map(|i| format!("{} wow monads!!!!", i))
+    }
+
+    /// well okay, these don't work yet, but you get the idea...
+    fn direct_convert_to_string<F, A>(fa: A) -> String
+    where
+        F: HKT + Functor<F>,
+        F: Reify<F, String>,
+        A: IntoKind<F, A>,
+    {
+        // fa.into_kind().map(|i| format!("{:?} monads!!!!", i)).reify()
+        unimplemented!()
+    }
+
+    #[test]
+    fn test_consuming_a_functor() {
+        println!("{:?}", convert_to_string(Some(1).into_kind()));
+        println!("{:?}", convert_to_string(vec![1, 2, 3].into_kind()));
+
+        // println!("{:?}", direct_convert_to_string(Some(1)));
+        // println!("{:?}", direct_convert_to_string(vec![1,2,3]))
+    }
+}

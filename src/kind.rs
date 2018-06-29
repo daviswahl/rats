@@ -3,9 +3,11 @@ use std::marker::PhantomData;
 pub trait HKT {}
 
 #[allow(dead_code)]
+#[derive(Debug, PartialEq)]
 pub enum Kind<K: HKT, A> {
     Vec(Vec<A>),
     Option(Option<A>),
+    // Is this valid? also need to understand which pointer type to use here
     __MARKER(PhantomData<*const K>),
 }
 
@@ -72,23 +74,23 @@ impl<T> Reify<OptionKind, T> for Kind<OptionKind, T> {
     }
 }
 
+#[derive(Debug, PartialEq)]
 pub struct VecKind;
 impl HKT for VecKind {}
 
+#[derive(Debug, PartialEq)]
 pub struct OptionKind;
 impl HKT for OptionKind {}
 
-#[cfg(tests)]
+#[cfg(test)]
 mod tests {
+    use super::*;
     #[test]
     fn tests() {
         let r = vec![1, 2, 3].into_kind();
-        assert_eq!(vec![1, 2, 3], r.extract());
+        assert_eq!(vec![1, 2, 3], r.reify());
 
         let r = Some(1).into_kind();
         assert_eq!(Some(1), r.reify());
-
-        let r = Ok("yes").into_kind();
-        assert_eq!(Ok("yes"), r.reify())
     }
 }
