@@ -1,13 +1,13 @@
 use kind::Kind;
 use kind::HKT;
 
-pub trait Functor<K: HKT> {
+pub trait Functor<K: HKT>: HKT {
     fn map<F, A, B>(a: Kind<K, A>, f: F) -> Kind<K, B>
     where
         F: Fn(A) -> B;
 }
 
-pub trait KindFunctorExt<K: HKT>
+pub trait KindFunctorExt<K>
 where
     K: Functor<K>,
 {
@@ -19,7 +19,7 @@ where
 
 impl<K, T> KindFunctorExt<K> for Kind<K, T>
 where
-    K: HKT + Functor<K>,
+    K: Functor<K>,
 {
     type Item = T;
 

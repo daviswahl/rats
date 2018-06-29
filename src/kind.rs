@@ -1,10 +1,10 @@
-use id::Id;
+use data::id::Id;
 use std::marker::PhantomData;
 
 pub trait HKT: Sized + 'static {}
 
 #[allow(dead_code)]
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Kind<K: HKT, A> {
     Vec(Vec<A>),
     Option(Option<A>),

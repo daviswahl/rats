@@ -1,8 +1,8 @@
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Id<T>(pub T);
 
-impl<T> Id <T> {
-    pub fn take(self) -> T { 
+impl<T> Id<T> {
+    pub fn take(self) -> T {
         self.0
     }
 }

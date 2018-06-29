@@ -1,6 +1,6 @@
 use applicative::Applicative;
+use data::id::{Id, IdExt};
 use functor::Functor;
-use id::{Id, IdExt};
 use kind::{IntoKind, Kind, Reify};
 use kinds::IdKind;
 
@@ -31,7 +31,7 @@ impl Functor<IdKind> for IdKind {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use applicative::{ApplicativeExt, ApplicativeKindExt};
+    use applicative::{ApplicativeKindExt, Point};
     use functor::KindFunctorExt;
     #[test]
     fn test_applicative() {

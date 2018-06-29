@@ -5,9 +5,9 @@
 extern crate test;
 
 pub mod applicative;
+pub mod data;
 pub mod function_k;
 pub mod functor;
-pub mod id;
 pub mod instances;
 pub mod kind;
 pub mod kinds;

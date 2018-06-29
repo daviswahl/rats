@@ -1,18 +1,17 @@
-use kind::{HKT, IntoKind, Reify, Kind};
-use id::Id;
+use data::id::Id;
+use kind::{IntoKind, Kind, Reify, HKT};
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct VecKind;
 impl HKT for VecKind {}
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct OptionKind;
 impl HKT for OptionKind {}
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct IdKind;
 impl HKT for IdKind {}
-
 
 impl<T> IntoKind<VecKind, T> for Vec<T> {
     type Kind = VecKind;

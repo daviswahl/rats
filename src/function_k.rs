@@ -3,7 +3,7 @@ use kind::HKT;
 use kind::{IntoKind, Reify};
 use kinds::{OptionKind, VecKind};
 
-pub trait FunctionK<F: HKT, G: HKT> {
+pub trait FunctionK<F: HKT, G: HKT>: HKT {
     fn map_kind<A>(fa: Kind<F, A>) -> Kind<G, A>;
 }
 
