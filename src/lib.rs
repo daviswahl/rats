@@ -7,15 +7,14 @@ pub mod functor;
 pub mod instances;
 pub mod kind;
 pub mod applicative;
-mod scratch;
+pub mod kinds;
 
 #[cfg(test)]
 mod tests {
     use function_k::KindFunctionKExt;
     use functor::KindFunctorExt;
-    use kind::IntoKind;
-    use kind::Reify;
-    use kind::VecKind;
+    use kind::{IntoKind,Reify};
+    use kinds::VecKind;
     use test::{black_box, Bencher};
 
     #[bench]

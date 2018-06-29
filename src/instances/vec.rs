@@ -2,7 +2,7 @@ use functor::Functor;
 use kind::IntoKind;
 use kind::Kind;
 use kind::Reify;
-use kind::VecKind;
+use kinds::VecKind;
 
 impl Functor<VecKind> for VecKind {
     fn map<F, A, B>(a: Kind<VecKind, A>, f: F) -> Kind<VecKind, B>
@@ -42,7 +42,6 @@ mod tests {
         assert_eq!(result, vec!["foo", "bar", "batz"]);
     }
 
-    use std::ops::Add;
     use std::string::String;
     #[test]
     fn test_with_mut_refs() {

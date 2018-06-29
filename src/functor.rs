@@ -34,8 +34,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use kind::{IntoKind, OptionKind, Reify, VecKind};
-    use std::fmt::Debug;
+    use kind::IntoKind;
 
     fn convert_to_string<F>(fa: Kind<F, i32>) -> Kind<F, String>
     where

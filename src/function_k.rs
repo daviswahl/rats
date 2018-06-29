@@ -1,7 +1,7 @@
 use kind::Kind;
 use kind::HKT;
 use kind::{IntoKind, Reify};
-use kind::{OptionKind, VecKind};
+use kinds::{OptionKind, VecKind};
 
 pub trait FunctionK<F: HKT, G: HKT> {
     fn map_kind<A>(fa: Kind<F, A>) -> Kind<G, A>;
