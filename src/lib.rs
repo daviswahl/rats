@@ -6,6 +6,7 @@ pub mod function_k;
 pub mod functor;
 pub mod instances;
 pub mod kind;
+pub mod applicative;
 mod scratch;
 
 #[cfg(test)]

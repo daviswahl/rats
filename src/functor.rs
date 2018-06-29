@@ -1,5 +1,6 @@
 use kind::Kind;
 use kind::HKT;
+
 pub trait Functor<K: HKT> {
     fn map<F, A, B>(a: Kind<K, A>, f: F) -> Kind<K, B>
     where
@@ -41,17 +42,6 @@ mod tests {
         F: HKT + Functor<F>,
     {
         fa.map(|i| format!("{} wow monads!!!!", i))
-    }
-
-    /// well okay, these don't work yet, but you get the idea...
-    fn direct_convert_to_string<F, A>(fa: A) -> String
-    where
-        F: HKT + Functor<F>,
-        F: Reify<F, String>,
-        A: IntoKind<F, A>,
-    {
-        // fa.into_kind().map(|i| format!("{:?} monads!!!!", i)).reify()
-        unimplemented!()
     }
 
     #[test]

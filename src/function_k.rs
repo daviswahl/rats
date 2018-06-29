@@ -40,7 +40,7 @@ where
 
 #[test]
 fn test() {
-    let s: Kind<OptionKind, i32> = Some(1).into_kind();
+    let s = Some(1).into_kind();
     let r = s.map_kind::<VecKind>();
     assert_eq!(r.reify(), vec![1]);
 }
