@@ -13,7 +13,9 @@ impl Applicative<IdKind> for IdKind {
     where
         F: FnOnce(A) -> B,
     {
-        unimplemented!()
+        let fa = fa.reify().take();
+        let ff = ff.reify().take();
+        ff(fa).id().into_kind()
     }
 }
 
@@ -29,12 +31,14 @@ impl Functor<IdKind> for IdKind {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use applicative::ApplicativeExt;
+    use applicative::{ApplicativeExt, ApplicativeKindExt};
     use functor::KindFunctorExt;
     #[test]
     fn test_applicative() {
-        let r = 5_i32.point::<IdKind>();
-        assert_eq!(r, Kind::Id::<IdKind, i32>(Id(5)))
+        let r = 5.point::<IdKind>();
+        assert_eq!(r, Kind::Id::<IdKind, i32>(Id(5)));
+
+        assert_eq!(r.ap(Id(|i| i * 2).into_kind()), 10.id().into_kind())
     }
 
     #[test]

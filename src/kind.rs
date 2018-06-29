@@ -1,7 +1,7 @@
-use std::marker::PhantomData;
 use id::Id;
+use std::marker::PhantomData;
 
-pub trait HKT {}
+pub trait HKT: Sized + 'static {}
 
 #[allow(dead_code)]
 #[derive(Debug, PartialEq)]

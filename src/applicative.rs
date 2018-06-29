@@ -30,6 +30,10 @@ pub trait ApplicativeExt {
 pub trait ApplicativeKindExt<K: HKT + Applicative<K>> {
     type Item;
     fn product<B>(self, Kind<K, B>) -> Kind<K, (Self::Item, B)>;
+
+    fn ap<B, F>(self, ff: Kind<K, F>) -> Kind<K, B>
+    where
+        F: FnOnce(Self::Item) -> B;
 }
 
 impl<K, T> ApplicativeKindExt<K> for Kind<K, T>
@@ -39,6 +43,13 @@ where
     type Item = T;
     fn product<B>(self, fb: Kind<K, B>) -> Kind<K, (Self::Item, B)> {
         K::product(self, fb)
+    }
+
+    fn ap<B, F>(self, ff: Kind<K, F>) -> Kind<K, B>
+    where
+        F: FnOnce(Self::Item) -> B,
+    {
+        K::ap(self, ff)
     }
 }
 
