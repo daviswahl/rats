@@ -2,7 +2,7 @@ use data::id::Id;
 use futures::prelude::*;
 use std::marker::PhantomData;
 
-pub trait HKT: Sized + 'static + Send + Sync {}
+pub trait HKT: Sized + 'static {}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Empty;
@@ -11,12 +11,12 @@ pub trait EmptyType {}
 impl EmptyType for Empty {}
 
 #[allow(dead_code)]
-pub enum Kind<K: HKT, A, B = Empty> {
+pub enum Kind<'kind, K: HKT, A: 'kind, B: 'kind = Empty> {
     Vec(Vec<A>),
     Option(Option<A>),
     Id(Id<A>),
     Result(Result<A, B>),
-    Future(Box<dyn Future<Item = A, Error = B>>),
+    Future(Box<dyn Future<Item = A, Error = B> + 'kind>),
     // Is this valid? also need to understand which pointer type to use here
     __MARKER(PhantomData<*const K>),
 }
@@ -31,9 +31,9 @@ pub trait ReifyRef<K: HKT, A, B = Empty> {
     fn reify_as_ref(&self) -> &Self::Out;
 }
 
-pub trait IntoKind<K: HKT, A, B = Empty> {
+pub trait IntoKind<'kind, K: HKT, A: 'kind, B: 'kind = Empty> {
     type Kind: HKT;
-    fn into_kind(self) -> Kind<K, A, B>;
+    fn into_kind(self) -> Kind<'kind, K, A, B>;
 }
 
 pub trait AsKind<K: HKT, A, B = Empty> {

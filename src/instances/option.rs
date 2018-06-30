@@ -4,17 +4,17 @@ use kind::{IntoKind, Kind, Reify};
 use kinds::OptionKind;
 
 impl Functor<OptionKind> for OptionKind {
-    fn map<F, A, B>(a: Kind<OptionKind, A>, f: F) -> Kind<OptionKind, B>
+    fn map<'kind, F, A, B>(a: Kind<'kind, OptionKind, A>, f: F) -> Kind<'kind, OptionKind, B>
     where
-        F: FnOnce(A) -> B,
+        F: FnOnce(A) -> B + 'kind,
     {
         a.reify().map(f).into_kind()
     }
 }
 
-type OptionK<A> = Kind<OptionKind, A>;
+type OptionK<'kind, A> = Kind<'kind, OptionKind, A>;
 impl Applicative<OptionKind> for OptionKind {
-    fn ap<A, B, F>(fa: OptionK<A>, ff: OptionK<F>) -> OptionK<B>
+    fn ap<'kind, A, B, F>(fa: OptionK<A>, ff: OptionK<F>) -> OptionK<'kind, B>
     where
         F: FnOnce(A) -> B,
     {
@@ -23,7 +23,7 @@ impl Applicative<OptionKind> for OptionKind {
         fa.and_then(|fa| ff.map(|ff| ff(fa))).into_kind()
     }
 
-    fn point<A>(a: A) -> Kind<OptionKind, A> {
+    fn point<'kind, A>(a: A) -> Kind<'kind, OptionKind, A> {
         Some(a).into_kind()
     }
 }
@@ -40,7 +40,10 @@ mod tests {
         assert_eq!(Some(5), f.reify());
     }
 
-    fn show_off_kind_tupler<K, A, B>(a: Kind<K, A>, b: Kind<K, B>) -> Kind<K, (A, B)>
+    fn show_off_kind_tupler<'kind, K, A, B>(
+        a: Kind<'kind, K, A>,
+        b: Kind<'kind, K, B>,
+    ) -> Kind<'kind, K, (A, B)>
     where
         K: HKT + Applicative<K>,
     {

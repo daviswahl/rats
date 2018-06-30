@@ -21,48 +21,52 @@ impl HKT for ResultKind {}
 pub struct FutureKind;
 impl HKT for FutureKind {}
 
-impl<T> IntoKind<VecKind, T> for Vec<T> {
+#[derive(Clone, Debug, PartialEq)]
+pub struct OptionTKind;
+impl HKT for OptionTKind {}
+
+impl<'kind, T: 'kind> IntoKind<'kind, VecKind, T> for Vec<T> {
     type Kind = VecKind;
-    fn into_kind(self) -> Kind<VecKind, T> {
+    fn into_kind(self) -> Kind<'kind, VecKind, T> {
         Kind::Vec::<VecKind, T>(self)
     }
 }
 
-impl<T> IntoKind<OptionKind, T> for Option<T> {
+impl<'kind, T: 'kind> IntoKind<'kind, OptionKind, T> for Option<T> {
     type Kind = OptionKind;
-    fn into_kind(self) -> Kind<OptionKind, T> {
+    fn into_kind(self) -> Kind<'kind, OptionKind, T> {
         Kind::Option::<OptionKind, T>(self)
     }
 }
 
-impl<T> IntoKind<IdKind, T> for Id<T> {
+impl<'kind, T: 'kind> IntoKind<'kind, IdKind, T> for Id<T> {
     type Kind = IdKind;
-    fn into_kind(self) -> Kind<IdKind, T> {
+    fn into_kind(self) -> Kind<'kind, IdKind, T> {
         Kind::Id::<IdKind, T>(self)
     }
 }
 
-impl<A, B> IntoKind<ResultKind, A, B> for Result<A, B> {
+impl<'kind, A: 'kind, B: 'kind> IntoKind<'kind, ResultKind, A, B> for Result<A, B> {
     type Kind = ResultKind;
-    fn into_kind(self) -> Kind<ResultKind, A, B> {
+    fn into_kind(self) -> Kind<'kind, ResultKind, A, B> {
         Kind::Result::<ResultKind, A, B>(self)
     }
 }
 
 use futures::future::Future;
-impl<A, B, F> IntoKind<FutureKind, A, B> for F
+impl<'kind, A: 'kind, B: 'kind, F> IntoKind<'kind, FutureKind, A, B> for F
 where
     F: Future<Item = A, Error = B>,
     F: 'static,
 {
     type Kind = FutureKind;
-    fn into_kind(self) -> Kind<FutureKind, A, B> {
+    fn into_kind(self) -> Kind<'kind, FutureKind, A, B> {
         Kind::Future::<FutureKind, A, B>(Box::new(self))
     }
 }
 
 #[allow(unreachable_patterns)]
-impl<T> Reify<VecKind, T> for Kind<VecKind, T> {
+impl<'kind, T> Reify<VecKind, T> for Kind<'kind, VecKind, T> {
     type Out = Vec<T>;
     fn reify(self) -> Vec<T> {
         match self {
@@ -73,7 +77,7 @@ impl<T> Reify<VecKind, T> for Kind<VecKind, T> {
 }
 
 #[allow(unreachable_patterns)]
-impl<T> ReifyRef<VecKind, T> for Kind<VecKind, T> {
+impl<'kind, T> ReifyRef<VecKind, T> for Kind<'kind, VecKind, T> {
     type Out = Vec<T>;
     fn reify_as_ref(&self) -> &Vec<T> {
         match *self {
@@ -84,7 +88,7 @@ impl<T> ReifyRef<VecKind, T> for Kind<VecKind, T> {
 }
 
 #[allow(unreachable_patterns)]
-impl<T> Reify<OptionKind, T> for Kind<OptionKind, T> {
+impl<'kind, T> Reify<OptionKind, T> for Kind<'kind, OptionKind, T> {
     type Out = Option<T>;
 
     fn reify(self) -> Self::Out {
@@ -96,7 +100,7 @@ impl<T> Reify<OptionKind, T> for Kind<OptionKind, T> {
 }
 
 #[allow(unreachable_patterns)]
-impl<T> ReifyRef<OptionKind, T> for Kind<OptionKind, T> {
+impl<'kind, T> ReifyRef<OptionKind, T> for Kind<'kind, OptionKind, T> {
     type Out = Option<T>;
 
     fn reify_as_ref(&self) -> &Self::Out {
@@ -108,7 +112,7 @@ impl<T> ReifyRef<OptionKind, T> for Kind<OptionKind, T> {
 }
 
 #[allow(unreachable_patterns)]
-impl<T> Reify<IdKind, T> for Kind<IdKind, T> {
+impl<'kind, T> Reify<IdKind, T> for Kind<'kind, IdKind, T> {
     type Out = Id<T>;
     fn reify(self) -> Id<T> {
         match self {
@@ -119,7 +123,7 @@ impl<T> Reify<IdKind, T> for Kind<IdKind, T> {
 }
 
 #[allow(unreachable_patterns)]
-impl<T> ReifyRef<IdKind, T> for Kind<IdKind, T> {
+impl<'kind, T> ReifyRef<IdKind, T> for Kind<'kind, IdKind, T> {
     type Out = Id<T>;
     fn reify_as_ref(&self) -> &Id<T> {
         match *self {
@@ -130,7 +134,7 @@ impl<T> ReifyRef<IdKind, T> for Kind<IdKind, T> {
 }
 
 #[allow(unreachable_patterns)]
-impl<A, B> Reify<ResultKind, A, B> for Kind<ResultKind, A, B> {
+impl<'kind, A, B> Reify<ResultKind, A, B> for Kind<'kind, ResultKind, A, B> {
     type Out = Result<A, B>;
     fn reify(self) -> Result<A, B> {
         match self {
@@ -141,9 +145,9 @@ impl<A, B> Reify<ResultKind, A, B> for Kind<ResultKind, A, B> {
 }
 
 #[allow(unreachable_patterns)]
-impl<A, B> Reify<FutureKind, A, B> for Kind<FutureKind, A, B> {
-    type Out = Box<Future<Item = A, Error = B>>;
-    fn reify(self) -> Box<Future<Item = A, Error = B>> {
+impl<'kind, A: 'kind, B: 'kind> Reify<FutureKind, A, B> for Kind<'kind, FutureKind, A, B> {
+    type Out = Box<Future<Item = A, Error = B> + 'kind>;
+    fn reify(self) -> Box<Future<Item = A, Error = B> + 'kind> {
         match self {
             Kind::Future(t) => t,
             _ => unreachable!(),
@@ -152,7 +156,7 @@ impl<A, B> Reify<FutureKind, A, B> for Kind<FutureKind, A, B> {
 }
 use std::fmt;
 use std::fmt::{Debug, Formatter};
-impl<K, A, B> Debug for Kind<K, A, B>
+impl<'kind, K, A, B> Debug for Kind<'kind, K, A, B>
 where
     K: HKT,
     A: Debug,
@@ -161,11 +165,11 @@ where
     <Self as ReifyRef<K, A, B>>::Out: Debug,
 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "Kind<{:?}>", self.reify_as_ref())
+        write!(f, "Kind<'kind,{:?}>", self.reify_as_ref())
     }
 }
 
-impl<K, A, B> PartialEq for Kind<K, A, B>
+impl<'kind, K, A, B> PartialEq for Kind<'kind, K, A, B>
 where
     K: HKT,
     A: PartialEq,

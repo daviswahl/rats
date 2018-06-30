@@ -4,32 +4,32 @@ use kind::Kind;
 use kind::HKT;
 
 pub trait Functor<K: HKT, Z = Empty>: HKT {
-    fn map<F, A, B>(a: Kind<K, A, Z>, f: F) -> Kind<K, B, Z>
+    fn map<'kind, F, A, B>(a: Kind<'kind, K, A, Z>, f: F) -> Kind<'kind, K, B, Z>
     where
-        F: Fn(A) -> B;
+        F: Fn(A) -> B + 'kind;
 }
 
-pub trait KindFunctorExt<K, Z = Empty>
+pub trait KindFunctorExt<'kind, K, Z = Empty>
 where
     K: Functor<K, Z>,
 {
     type Item;
     type Z = Z;
-    fn map<B, F>(self, f: F) -> Kind<K, B, Self::Z>
+    fn map<B, F>(self, f: F) -> Kind<'kind, K, B, Self::Z>
     where
-        F: Fn(Self::Item) -> B;
+        F: Fn(Self::Item) -> B + 'kind;
 }
 
-impl<K, T, Z> KindFunctorExt<K, Z> for Kind<K, T, Z>
+impl<'kind, K, T, Z> KindFunctorExt<'kind, K, Z> for Kind<'kind, K, T, Z>
 where
     K: Functor<K, Z>,
 {
     type Item = T;
     type Z = Z;
 
-    fn map<B, F>(self, f: F) -> Kind<K, B, Self::Z>
+    fn map<B, F>(self, f: F) -> Kind<'kind, K, B, Self::Z>
     where
-        F: Fn(Self::Item) -> B,
+        F: Fn(Self::Item) -> B + 'kind,
     {
         K::map(self, f)
     }
@@ -40,7 +40,7 @@ mod tests {
     use super::*;
     use kind::IntoKind;
 
-    fn convert_to_string<F>(fa: Kind<F, i32>) -> Kind<F, String>
+    fn convert_to_string<'kind, F>(fa: Kind<'kind, F, i32>) -> Kind<'kind, F, String>
     where
         F: Functor<F>,
     {

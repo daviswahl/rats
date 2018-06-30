@@ -4,9 +4,9 @@ use kind::{Empty, IntoKind, Kind, Reify, HKT};
 use kinds::{OptionKind, ResultKind};
 
 impl<Z> Functor<ResultKind, Z> for ResultKind {
-    fn map<F, A, B>(a: Kind<ResultKind, A, Z>, f: F) -> Kind<ResultKind, B, Z>
+    fn map<'kind, F, A, B>(a: Kind<'kind, ResultKind, A, Z>, f: F) -> Kind<'kind, ResultKind, B, Z>
     where
-        F: FnMut(A) -> B,
+        F: FnMut(A) -> B + 'kind,
     {
         a.reify().map(f).into_kind()
     }
@@ -14,7 +14,7 @@ impl<Z> Functor<ResultKind, Z> for ResultKind {
 
 impl<Z> FunctionK<ResultKind, OptionKind, Z> for ResultKind {
     type ZOut = Empty;
-    fn map_kind<A>(fa: Kind<ResultKind, A, Z>) -> Kind<OptionKind, A, Empty> {
+    fn map_kind<'kind, A>(fa: Kind<'kind, ResultKind, A, Z>) -> Kind<'kind, OptionKind, A, Empty> {
         match fa.reify() {
             Ok(t) => Some(t),
             Err(_) => None,
@@ -22,14 +22,14 @@ impl<Z> FunctionK<ResultKind, OptionKind, Z> for ResultKind {
     }
 }
 
-trait ResultKindExt<A, B> {
-    fn map_kind<G: HKT>(self) -> Kind<G, A, Empty>
+trait ResultKindExt<'kind, A, B> {
+    fn map_kind<G: HKT>(self) -> Kind<'kind, G, A, Empty>
     where
         ResultKind: FunctionK<ResultKind, G, B, ZOut = Empty>;
 }
 
-impl<A, B> ResultKindExt<A, B> for Kind<ResultKind, A, B> {
-    fn map_kind<G: HKT>(self) -> Kind<G, A, Empty>
+impl<'kind, A, B> ResultKindExt<'kind, A, B> for Kind<'kind, ResultKind, A, B> {
+    fn map_kind<G: HKT>(self) -> Kind<'kind, G, A, Empty>
     where
         ResultKind: FunctionK<ResultKind, G, B, ZOut = Empty>,
     {
@@ -38,10 +38,10 @@ impl<A, B> ResultKindExt<A, B> for Kind<ResultKind, A, B> {
 }
 
 trait ResultExt {
-    fn ok<A>(self) -> Kind<ResultKind, Self, A>
+    fn ok<'kind, A>(self) -> Kind<'kind, ResultKind, Self, A>
     where
         Self: Sized;
-    fn err<A>(self) -> Kind<ResultKind, A, Self>
+    fn err<'kind, A>(self) -> Kind<'kind, ResultKind, A, Self>
     where
         Self: Sized;
 }
@@ -50,11 +50,11 @@ impl<T> ResultExt for T
 where
     T: Sized,
 {
-    fn ok<A>(self) -> Kind<ResultKind, T, A> {
+    fn ok<'kind, A>(self) -> Kind<'kind, ResultKind, T, A> {
         Ok::<T, A>(self).into_kind()
     }
 
-    fn err<A>(self) -> Kind<ResultKind, A, T> {
+    fn err<'kind, A>(self) -> Kind<'kind, ResultKind, A, T> {
         Err::<A, T>(self).into_kind()
     }
 }

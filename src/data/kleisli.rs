@@ -1,21 +1,21 @@
 use kind::{Kind, HKT};
 use std::marker::PhantomData;
 
-struct Run<F, A, B, Func>
+struct Run<'kind, F, A: 'kind, B: 'kind, Func>
 where
     F: HKT,
-    Func: Fn(A) -> Kind<F, B>,
+    Func: Fn(A) -> Kind<'kind, F, B>,
 {
     func: Func,
     a: PhantomData<*const A>,
     b: PhantomData<*const B>,
 }
-impl<F, A, B, Func> Run<F, A, B, Func>
+impl<'kind, F, A: 'kind, B: 'kind, Func> Run<'kind, F, A, B, Func>
 where
     F: HKT,
-    Func: Fn(A) -> Kind<F, B>,
+    Func: Fn(A) -> Kind<'kind, F, B>,
 {
-    fn new(f: Func) -> Run<F, A, B, Func> {
+    fn new(f: Func) -> Run<'kind, F, A, B, Func> {
         Run {
             func: f,
             a: PhantomData,
@@ -23,9 +23,9 @@ where
         }
     }
 }
-struct Kleisli<F: HKT, A, B, Func>
+struct Kleisli<'kind, F: HKT, A: 'kind, B: 'kind, Func>
 where
-    Func: Fn(A) -> Kind<F, B>,
+    Func: Fn(A) -> Kind<'kind, F, B>,
 {
-    run: Run<F, A, B, Func>,
+    run: Run<'kind, F, A, B, Func>,
 }
