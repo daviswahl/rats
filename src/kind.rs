@@ -22,7 +22,3 @@ pub trait IntoKind<K: HKT, T> {
     type Kind: HKT;
     fn into_kind(self) -> Kind<K, T>;
 }
-
-pub trait KindMarker {}
-impl<T> KindMarker for Option<T> {}
-impl<T> KindMarker for Vec<T> {}
