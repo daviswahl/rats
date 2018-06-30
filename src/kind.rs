@@ -6,6 +6,9 @@ pub trait HKT: Sized + 'static + Send + Sync {}
 #[derive(Clone, Debug, PartialEq)]
 pub struct Empty;
 
+pub trait EmptyType {}
+impl EmptyType for Empty {}
+
 #[allow(dead_code)]
 #[derive(Clone, Debug, PartialEq)]
 pub enum Kind<K: HKT, A, B = Empty> {
