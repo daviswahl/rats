@@ -37,6 +37,28 @@ impl<A, B> ResultKindExt<A, B> for Kind<ResultKind, A, B> {
     }
 }
 
+trait ResultExt {
+    fn ok<A>(self) -> Kind<ResultKind, Self, A>
+    where
+        Self: Sized;
+    fn err<A>(self) -> Kind<ResultKind, A, Self>
+    where
+        Self: Sized;
+}
+
+impl<T> ResultExt for T
+where
+    T: Sized,
+{
+    fn ok<A>(self) -> Kind<ResultKind, T, A> {
+        Ok::<T, A>(self).into_kind()
+    }
+
+    fn err<A>(self) -> Kind<ResultKind, A, T> {
+        Err::<A, T>(self).into_kind()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -49,16 +71,10 @@ mod tests {
 
     #[test]
     fn test_result_function_k() {
-        let r = Ok::<i32, &str>(4)
-            .into_kind()
-            .map_kind::<OptionKind>()
-            .reify();
+        let r = 4.ok::<&str>().map_kind::<OptionKind>().reify();
         assert_eq!(r, Some(4));
 
-        let r = Err::<i32, &str>("woops")
-            .into_kind()
-            .map_kind::<OptionKind>()
-            .reify();
+        let r = "woop".err::<i32>().map_kind::<OptionKind>().reify();
         assert_eq!(r, None)
     }
 }
