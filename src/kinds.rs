@@ -17,6 +17,10 @@ impl HKT for IdKind {}
 pub struct ResultKind;
 impl HKT for ResultKind {}
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct FutureKind;
+impl HKT for FutureKind {}
+
 impl<T> IntoKind<VecKind, T> for Vec<T> {
     type Kind = VecKind;
     fn into_kind(self) -> Kind<VecKind, T> {
@@ -42,6 +46,18 @@ impl<A, B> IntoKind<ResultKind, A, B> for Result<A, B> {
     type Kind = ResultKind;
     fn into_kind(self) -> Kind<ResultKind, A, B> {
         Kind::Result::<ResultKind, A, B>(self)
+    }
+}
+
+use futures::future::Future;
+impl<A, B, F> IntoKind<FutureKind, A, B> for F
+where
+    F: Future<Item = A, Error = B>,
+    F: 'static,
+{
+    type Kind = FutureKind;
+    fn into_kind(self) -> Kind<FutureKind, A, B> {
+        Kind::Future::<FutureKind, A, B>(Box::new(self))
     }
 }
 
@@ -124,6 +140,16 @@ impl<A, B> Reify<ResultKind, A, B> for Kind<ResultKind, A, B> {
     }
 }
 
+#[allow(unreachable_patterns)]
+impl<A, B> Reify<FutureKind, A, B> for Kind<FutureKind, A, B> {
+    type Out = Box<Future<Item = A, Error = B>>;
+    fn reify(self) -> Box<Future<Item = A, Error = B>> {
+        match self {
+            Kind::Future(t) => t,
+            _ => unreachable!(),
+        }
+    }
+}
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 impl<K, A, B> Debug for Kind<K, A, B>
