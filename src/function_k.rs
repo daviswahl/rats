@@ -1,14 +1,17 @@
+use kind::Empty;
 use kind::Kind;
 use kind::HKT;
-use kind::{IntoKind, Reify};
+use kind::{EmptyType, IntoKind, Reify};
 use kinds::{OptionKind, VecKind};
 
-pub trait FunctionK<F: HKT, G: HKT>: HKT {
-    fn map_kind<A>(fa: Kind<F, A>) -> Kind<G, A>;
+pub trait FunctionK<F: HKT, G: HKT, Z = Empty>: HKT {
+    type ZOut;
+    fn map_kind<A>(fa: Kind<F, A, Z>) -> Kind<G, A, Self::ZOut>;
 }
 
 impl FunctionK<OptionKind, VecKind> for OptionKind {
-    fn map_kind<A>(fa: Kind<OptionKind, A>) -> Kind<VecKind, A> {
+    type ZOut = Empty;
+    fn map_kind<A>(fa: Kind<OptionKind, A, Empty>) -> Kind<VecKind, A, Self::ZOut> {
         let t = match fa.reify() {
             Some(t) => vec![t],
             None => vec![],
@@ -17,22 +20,25 @@ impl FunctionK<OptionKind, VecKind> for OptionKind {
     }
 }
 
-pub trait KindFunctionKExt<K, A>
+pub trait KindFunctionKExt<K, A, Z = Empty>
 where
     K: HKT,
 {
-    fn map_kind<G: HKT>(self) -> Kind<G, A>
+    type ZOut = Z;
+    fn map_kind<G: HKT>(self) -> Kind<G, A, Self::ZOut>
     where
-        K: FunctionK<K, G>;
+        K: FunctionK<K, G, Z, ZOut = Self::ZOut>;
 }
 
-impl<K, A> KindFunctionKExt<K, A> for Kind<K, A>
+impl<K, A, Z> KindFunctionKExt<K, A, Z> for Kind<K, A, Z>
 where
     K: HKT,
+    Z: EmptyType,
 {
-    fn map_kind<G: HKT>(self) -> Kind<G, A>
+    type ZOut = Empty;
+    default fn map_kind<G: HKT>(self) -> Kind<G, A, Empty>
     where
-        K: FunctionK<K, G>,
+        K: FunctionK<K, G, Z, ZOut = Self::ZOut>,
     {
         K::map_kind(self)
     }

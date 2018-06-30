@@ -1,5 +1,6 @@
 #![feature(test)]
 #![feature(associated_type_defaults)]
+#![feature(specialization)]
 #![feature(tool_attributes)]
 
 extern crate test;
