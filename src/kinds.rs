@@ -13,6 +13,10 @@ impl HKT for OptionKind {}
 pub struct IdKind;
 impl HKT for IdKind {}
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct ResultKind;
+impl HKT for ResultKind {}
+
 impl<T> IntoKind<VecKind, T> for Vec<T> {
     type Kind = VecKind;
     fn into_kind(self) -> Kind<VecKind, T> {
@@ -31,6 +35,13 @@ impl<T> IntoKind<IdKind, T> for Id<T> {
     type Kind = IdKind;
     fn into_kind(self) -> Kind<IdKind, T> {
         Kind::Id::<IdKind, T>(self)
+    }
+}
+
+impl<A, B> IntoKind<ResultKind, A, B> for Result<A, B> {
+    type Kind = ResultKind;
+    fn into_kind(self) -> Kind<ResultKind, A, B> {
+        Kind::Result::<ResultKind, A, B>(self)
     }
 }
 
@@ -68,6 +79,17 @@ impl<T> Reify<IdKind, T> for Kind<IdKind, T> {
     }
 }
 
+#[allow(unreachable_patterns)]
+impl<A, B> Reify<ResultKind, A, B> for Kind<ResultKind, A, B> {
+    type Out = Result<A, B>;
+    fn reify(self) -> Result<A, B> {
+        match self {
+            Kind::Result(t) => t,
+            _ => unreachable!(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -81,5 +103,11 @@ mod tests {
 
         let r = Id(1).into_kind();
         assert_eq!(Id(1), r.reify());
+
+        let r = Ok::<i32, &str>(1).into_kind();
+        assert_eq!(Ok(1), r.reify());
+
+        let r = Err::<i32, &str>("woops").into_kind();
+        assert_eq!(Err("woops"), r.reify())
     }
 }
