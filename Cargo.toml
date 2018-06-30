@@ -4,5 +4,4 @@ version = "0.1.0"
 authors = ["Davis Wahl <dwahl@signalpath.com>"]
 
 [dependencies]
-
-futures = { git = "https://github.com/rust-lang-nursery/futures-rs/", branch = "0.3" }
+futures-preview = "0.2.2"

@@ -3,6 +3,7 @@
 #![feature(specialization)]
 #![feature(tool_attributes)]
 
+extern crate futures;
 extern crate test;
 
 pub mod applicative;

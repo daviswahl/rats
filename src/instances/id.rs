@@ -33,6 +33,7 @@ mod tests {
     use super::*;
     use applicative::{ApplicativeKindExt, Point};
     use functor::KindFunctorExt;
+    use kind::ReifyRef;
     #[test]
     fn test_applicative() {
         let r = 5.point::<IdKind>();
