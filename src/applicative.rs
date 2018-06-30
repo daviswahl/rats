@@ -11,6 +11,13 @@ pub trait Applicative<K: HKT>: Functor<K> {
         let t = Self::map(fa, f1);
         Self::ap(fb, t)
     }
+
+    fn map2<F, A, B, Z>(fa: Kind<K, A>, fb: Kind<K, B>, f: F) -> Kind<K, Z>
+    where
+        F: Fn((A, B)) -> Z,
+    {
+        Self::map(Self::product(fa, fb), f)
+    }
 }
 
 pub trait ApplicativeKindExt<K: Applicative<K>> {

@@ -1,8 +1,12 @@
+use applicative::Applicative;
+use applicative::Point;
+use foldable::Foldable;
 use functor::Functor;
 use kind::IntoKind;
 use kind::Kind;
 use kind::Reify;
 use kinds::VecKind;
+use traverse::Traverse;
 
 impl Functor<VecKind> for VecKind {
     fn map<F, A, B>(a: Kind<VecKind, A>, f: F) -> Kind<VecKind, B>
@@ -13,11 +17,46 @@ impl Functor<VecKind> for VecKind {
     }
 }
 
+impl Foldable<VecKind> for VecKind {
+    // this is almost certainly wrong.
+    fn fold_right<Func, A, B>(fa: Kind<VecKind, A>, acc: B, f: Func) -> B
+    where
+        Func: Fn((A, B)) -> B,
+    {
+        let mut accum = acc;
+        let mut iter = fa.reify().into_iter();
+        while let Some(x) = iter.next() {
+            accum = f((x, accum));
+        }
+        accum
+    }
+}
+
+impl Traverse<VecKind> for VecKind {
+    fn traverse<F, G, A, B>(fa: Kind<VecKind, A>, f: F) -> Kind<G, Kind<VecKind, B>>
+    where
+        G: Applicative<G>,
+        F: Fn(A) -> Kind<G, B>,
+    {
+        let acc = vec![].into_kind().point::<G>();
+        VecKind::fold_right(fa, acc, |(a, acc)| {
+            G::map2(f(a), acc, |(a, b)| {
+                // need to add a direct push method
+                let mut v = b.reify();
+                v.push(a);
+                v.into_kind()
+            })
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use functor::KindFunctorExt;
+    use identity;
     use kind::IntoKind;
+    use traverse::TraverseExt;
 
     #[test]
     fn test_vec_map_from_functor_1() {
@@ -28,6 +67,12 @@ mod tests {
         b: &'a str,
     }
 
+    #[test]
+    fn test_fold_right() {
+        let k = vec![1, 2, 3].into_kind();
+        let result = VecKind::fold_right(k, 0, |(i, acc)| i + acc);
+        assert_eq!(6, result);
+    }
     #[test]
     fn test_with_refs() {
         let foo = "foo".to_owned();
@@ -59,5 +104,14 @@ mod tests {
                 .reify();
         }
         assert_eq!(foo, "foobutts")
+    }
+
+    #[test]
+    fn test_traverse() {
+        let list = vec![Some(1), Some(2), None]
+            .into_kind()
+            .map(|k| k.into_kind())
+            .traverse(identity);
+        assert_eq!(list.map(|i| i.reify()).reify(), None)
     }
 }
