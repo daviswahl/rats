@@ -1,5 +1,4 @@
 use kind::Empty;
-use kind::EmptyType;
 use kind::Kind;
 use kind::HKT;
 

@@ -14,7 +14,7 @@ impl<Z> Functor<ResultKind, Z> for ResultKind {
 
 impl<Z> FunctionK<ResultKind, OptionKind, Z> for ResultKind {
     type ZOut = Empty;
-    fn map_kind<'kind, A>(fa: Kind<'kind, ResultKind, A, Z>) -> Kind<'kind, OptionKind, A, Empty> {
+    fn map_kind<A>(fa: Kind<ResultKind, A, Z>) -> Kind<OptionKind, A, Empty> {
         match fa.reify() {
             Ok(t) => Some(t),
             Err(_) => None,

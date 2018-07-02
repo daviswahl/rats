@@ -1,8 +1,5 @@
 use functor::Functor;
-use futures::future;
-use futures::future::Future;
 use futures::FutureExt;
-use kind::IntoKind;
 use kind::Kind;
 use kind::Reify;
 use kinds::FutureKind;
@@ -19,6 +16,9 @@ impl<Z> Functor<FutureKind, Z> for FutureKind {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use kind::IntoKind;
+
+    use futures::future;
     use functor::KindFunctorExt;
     use futures::executor::ThreadPool;
     use futures::future::FutureResult;

@@ -6,14 +6,14 @@ use kinds::{OptionKind, VecKind};
 
 pub trait FunctionK<F: HKT, G: HKT, Z = Empty>: HKT {
     type ZOut;
-    fn map_kind<'kind, A>(fa: Kind<'kind, F, A, Z>) -> Kind<'kind, G, A, Self::ZOut>;
+    fn map_kind<A>(fa: Kind<F, A, Z>) -> Kind<G, A, Self::ZOut>;
 }
 
 impl FunctionK<OptionKind, VecKind> for OptionKind {
     type ZOut = Empty;
-    fn map_kind<'kind, A>(
-        fa: Kind<'kind, OptionKind, A, Empty>,
-    ) -> Kind<'kind, VecKind, A, Self::ZOut> {
+    fn map_kind<A>(
+        fa: Kind<OptionKind, A, Empty>,
+    ) -> Kind<VecKind, A, Self::ZOut> {
         let t = match fa.reify() {
             Some(t) => vec![t],
             None => vec![],

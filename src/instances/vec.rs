@@ -19,14 +19,13 @@ impl Functor<VecKind> for VecKind {
 
 impl Foldable<VecKind> for VecKind {
     // this is almost certainly wrong.
-    fn fold_right<'kind, Func, A, B>(fa: Kind<'kind, VecKind, A>, acc: B, f: Func) -> B
+    fn fold_right<FnAbb, A, B>(fa: Kind<VecKind, A>, b: B, fn_abb: FnAbb) -> B
     where
-        Func: Fn((A, B)) -> B,
+        FnAbb: Fn((A, B)) -> B,
     {
-        let mut accum = acc;
-        let mut iter = fa.reify().into_iter();
-        while let Some(x) = iter.next() {
-            accum = f((x, accum));
+        let mut b = b;
+        for a in fa.reify() {
+            accum = fn_abb((a, accum));
         }
         accum
     }
