@@ -57,8 +57,8 @@ impl<'f_, A: 'f_, B: 'f_> IntoKind<'f_, ResultKind, A, B> for Result<A, B> {
 }
 
 impl<'f_, A: 'f_, B: 'f_, F_: 'f_> IntoKind<'f_, FutureKind, A, B> for F_
-where
-    F_: Future<Item = A, Error = B>,
+    where
+        F_: Future<Item = A, Error = B>,
 {
     default type Kind = FutureKind;
     default fn into_kind(self) -> Kind<'f_, FutureKind, A, B> {
@@ -67,10 +67,10 @@ where
 }
 
 impl<'f_, A: 'f_, B: 'f_>  IntoKind<'f_, FutureKind, A, B> for Box<Future<Item=A, Error=B>>
-where
+    where
 {
-     type Kind = FutureKind;
-     fn into_kind(self) -> Kind<'f_, FutureKind, A, B> {
+    type Kind = FutureKind;
+    fn into_kind(self) -> Kind<'f_, FutureKind, A, B> {
         Kind::Future::<FutureKind, A, B>(self)
     }
 }
@@ -166,12 +166,12 @@ impl<'f_, A: 'f_, B: 'f_> Reify<FutureKind, A, B> for Kind<'f_, FutureKind, A, B
 }
 
 impl<'f_, F_, A, B> Debug for Kind<'f_, F_, A, B>
-where
-    F_: HKT,
-    A: Debug,
-    B: Debug,
-    Self: ReifyRef<F_, A, B>,
-    <Self as ReifyRef<F_, A, B>>::Out: Debug,
+    where
+        F_: HKT,
+        A: Debug,
+        B: Debug,
+        Self: ReifyRef<F_, A, B>,
+        <Self as ReifyRef<F_, A, B>>::Out: Debug,
 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(f, "Kind<'f_,{:?}>", self.reify_as_ref())
@@ -179,12 +179,12 @@ where
 }
 
 impl<'f_, F_, A, B> PartialEq for Kind<'f_, F_, A, B>
-where
-    F_: HKT,
-    A: PartialEq,
-    B: PartialEq,
-    Self: ReifyRef<F_, A, B>,
-    <Self as ReifyRef<F_, A, B>>::Out: PartialEq,
+    where
+        F_: HKT,
+        A: PartialEq,
+        B: PartialEq,
+        Self: ReifyRef<F_, A, B>,
+        <Self as ReifyRef<F_, A, B>>::Out: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
         self.reify_as_ref() == other.reify_as_ref()

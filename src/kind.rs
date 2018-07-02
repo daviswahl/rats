@@ -6,14 +6,16 @@ pub trait HKT: Sized + 'static {}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Empty;
+impl HKT for Empty {}
 
 #[allow(dead_code)]
-pub enum Kind<'f_, F_: HKT, A: 'f_, B: 'f_ = Empty> {
+pub enum Kind<'f_, F_: HKT, A: 'f_, B: 'f_ = Empty, G_: HKT = Empty> {
     Vec(Vec<A>),
     Option(Option<A>),
     Id(Id<A>),
     Result(Result<A, B>),
     Future(Box<Future<Item = A, Error = B> + 'f_>),
+    Kind2(Box<Kind<'f_, G_, A, B>>),
     // Is this valid? also need to understand which pointer type to use here
     __MARKER(PhantomData<*const F_>),
 }
