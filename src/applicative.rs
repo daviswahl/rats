@@ -58,12 +58,12 @@ where
     F_: Applicative<'f_, F_, Z>,
 {
     type A = A;
-    /// (Self<A>, F<B>) -> F<(A,B)> where Self: F_
+/// (Self<A>, F<B>) -> F<(A,B)> where Self: F_
     fn product<B>(self, fb: Kind<'f_, F_, B, Z>) -> Kind<'f_, F_, (Self::A, B), Z> {
         F_::product(self, fb)
     }
 
-    /// (Self<A>, F<Fn(A) -> B>) -> F<B> where Self: F
+/// (Self<A>, F<Fn(A) -> B>) -> F<B> where Self: F
     fn ap<B, Fn_>(self, ffn: Kind<'f_, F_, Fn_, Z>) -> Kind<'f_, F_, B, Z>
     where
         Fn_: FnOnce(Self::A) -> B,

@@ -3,7 +3,7 @@ use futures::future::Future;
 use std::marker::{PhantomData, Send, Sync};
 use std::any::Any;
 
-pub trait HKT: Sync+Send+Sized + 'static {
+pub trait HKT: Sync + Send + Sized + 'static {
     type Kind: HKT;
 }
 

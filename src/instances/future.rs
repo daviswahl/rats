@@ -31,7 +31,6 @@ impl<'f_, Z> Applicative<'f_, FutureKind, Z> for FutureKind {
         let fb = fa.and_then(|fa| ff.map(|ff| ff(fa)));
 
         Kind::Future(Box::new(fb))
-
     }
 
     fn point<A>(a: A) -> FutureK<'f_, A, Z> {

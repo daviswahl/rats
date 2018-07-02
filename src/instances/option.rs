@@ -2,6 +2,7 @@ use applicative::Applicative;
 use functor::Functor;
 use kind::{IntoKind, Kind, Reify};
 use kinds::OptionKind;
+use monad::Monad;
 
 impl<'f_> Functor<'f_, OptionKind> for OptionKind {
     /// (Option<A>, Fn(A) -> B) -> Option<B>
@@ -29,11 +30,24 @@ impl<'f_> Applicative<'f_, OptionKind> for OptionKind {
     }
 }
 
+impl<'f_> Monad<'f_, OptionKind> for OptionKind {
+    fn flat_map<A, B, Fn_>(fa: Kind<'f_, OptionKind, A>, fn_: Fn_) -> OptionK<'f_, B> where
+        A: 'f_,
+        B: 'f_,
+        Fn_: Fn(A) -> Kind<'f_, OptionKind, B> {
+        match fa.reify() {
+            Some(f) => fn_(f),
+            None => None.into_kind()
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
     use super::*;
     use applicative::{ApplicativeKindExt, Point};
+    use functor::KindFunctorExt;
     #[test]
     fn test_option_pure() {
         let f = 5.point::<OptionKind>();
@@ -89,5 +103,17 @@ mod tests {
         let b = "hello".point::<OptionKind>();
         let result = a.product(b);
         assert_eq!(result.reify(), Some((5, "hello")));
+    }
+
+    #[test]
+
+    fn test_monad() {
+        let a = 5.point::<OptionKind>();
+        let a = OptionKind::flat_map(a, |a| a.point::<OptionKind>().map(|a| a * 2));
+        assert_eq!(a.reify(), Some(10));
+
+        let ffa = 5.point::<OptionKind>().map(|a| a.point::<OptionKind>());
+        let fa = OptionKind::flatten(ffa);
+        assert_eq!(fa.reify(), Some(5));
     }
 }

@@ -18,10 +18,10 @@ pub mod traverse;
 
 mod tests;
 mod scratch;
+mod monad;
 
 
 // TODO: Put this somewhere.
 pub fn identity<A>(a: A) -> A {
     a
 }
-

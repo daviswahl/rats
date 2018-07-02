@@ -10,10 +10,7 @@ where
     /// where
     /// G: Applicative
     /// λ: Fn(A) -> G<B>
-    fn traverse<Fn_, G_, A, B>(
-        fa: Kind<'f_, F_, A>,
-        fn_: Fn_,
-    ) -> Kind<'f_, G_, Kind<'f_, F_, B>>
+    fn traverse<Fn_, G_, A, B>(fa: Kind<'f_, F_, A>, fn_: Fn_) -> Kind<'f_, G_, Kind<'f_, F_, B>>
     where
         G_: Applicative<'f_, G_>,
         Fn_: Fn(A) -> Kind<'f_, G_, B>;

@@ -38,8 +38,13 @@ mod tests {
     }
 
     impl Functor<'static, CustomKind, Empty> for CustomKind {
-        fn map<Fn_, A, B>(a: Kind<'static, CustomKind, A, Empty>, f: Fn_) -> Kind<'static, CustomKind, B, Empty> where
-            Fn_: Fn(A) -> B + 'static {
+        fn map<Fn_, A, B>(
+            a: Kind<'static, CustomKind, A, Empty>,
+            f: Fn_,
+        ) -> Kind<'static, CustomKind, B, Empty>
+        where
+            Fn_: Fn(A) -> B + 'static,
+        {
             Custom(a.reify().0.into_iter().map(f).collect::<Vec<B>>()).into_kind()
         }
     }
