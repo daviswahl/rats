@@ -27,9 +27,3 @@ where
     }
 }
 
-impl<'kind, A, Z> Functor<OptionTKind, Z> for Kind<'kind, OptionTKind, A, Z>
-where
-    A: 'kind,
-    Z: 'kind,
-{
-}

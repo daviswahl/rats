@@ -25,24 +25,24 @@ impl HKT for FutureKind {}
 pub struct OptionTKind;
 impl HKT for OptionTKind {}
 
-impl<'kind, T: 'kind> IntoKind<'kind, VecKind, T> for Vec<T> {
+impl<'kind, A: 'kind> IntoKind<'kind, VecKind, A> for Vec<A> {
     type Kind = VecKind;
-    fn into_kind(self) -> Kind<'kind, VecKind, T> {
-        Kind::Vec::<VecKind, T>(self)
+    fn into_kind(self) -> Kind<'kind, VecKind, A> {
+        Kind::Vec::<VecKind, A>(self)
     }
 }
 
-impl<'kind, T: 'kind> IntoKind<'kind, OptionKind, T> for Option<T> {
+impl<'kind, A: 'kind> IntoKind<'kind, OptionKind, A> for Option<A> {
     type Kind = OptionKind;
-    fn into_kind(self) -> Kind<'kind, OptionKind, T> {
-        Kind::Option::<OptionKind, T>(self)
+    fn into_kind(self) -> Kind<'kind, OptionKind, A> {
+        Kind::Option::<OptionKind, A>(self)
     }
 }
 
-impl<'kind, T: 'kind> IntoKind<'kind, IdKind, T> for Id<T> {
+impl<'kind, A: 'kind> IntoKind<'kind, IdKind, A> for Id<A> {
     type Kind = IdKind;
-    fn into_kind(self) -> Kind<'kind, IdKind, T> {
-        Kind::Id::<IdKind, T>(self)
+    fn into_kind(self) -> Kind<'kind, IdKind, A> {
+        Kind::Id::<IdKind, A>(self)
     }
 }
 
@@ -54,10 +54,10 @@ impl<'kind, A: 'kind, B: 'kind> IntoKind<'kind, ResultKind, A, B> for Result<A, 
 }
 
 use futures::future::Future;
-impl<'kind, A: 'kind, B: 'kind, F> IntoKind<'kind, FutureKind, A, B> for F
+impl<'kind, A: 'kind, B: 'kind, F_> IntoKind<'kind, FutureKind, A, B> for F_
 where
-    F: Future<Item = A, Error = B>,
-    F: 'static,
+    F_: Future<Item = A, Error = B>,
+    F_: 'static,
 {
     type Kind = FutureKind;
     fn into_kind(self) -> Kind<'kind, FutureKind, A, B> {

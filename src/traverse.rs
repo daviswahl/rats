@@ -2,22 +2,22 @@ use applicative::Applicative;
 use functor::Functor;
 use kind::{Kind, HKT};
 
-pub trait Traverse<K: HKT>: Functor<K> {
-    fn traverse<'kind, F, G, A, B>(
-        fa: Kind<'kind, K, A>,
+pub trait Traverse<F_: HKT>: Functor<F_> {
+    fn traverse<'kind, F, G_, A, B>(
+        fa: Kind<'kind, F_, A>,
         f: F,
-    ) -> Kind<'kind, G, Kind<'kind, K, B>>
+    ) -> Kind<'kind, G_, Kind<'kind, F_, B>>
     where
-        G: Applicative<G>,
-        F: Fn(A) -> Kind<'kind, G, B>;
+        G_: Applicative<G_>,
+        F: Fn(A) -> Kind<'kind, G_, B>;
 }
 
-pub trait TraverseExt<'kind, K: Traverse<K>> {
+pub trait TraverseExt<'kind, F_: Traverse<F_>> {
     type Item;
-    fn traverse<F, G, B>(self, f: F) -> Kind<'kind, G, Kind<'kind, K, B>>
+    fn traverse<Func, G_, B>(self, f: Func) -> Kind<'kind, G_, Kind<'kind, F_, B>>
     where
-        G: Applicative<G>,
-        F: Fn(Self::Item) -> Kind<'kind, G, B>;
+        G_: Applicative<G_>,
+        Func: Fn(Self::Item) -> Kind<'kind, G_, B>;
 }
 
 impl<'kind, K, T> TraverseExt<'kind, K> for Kind<'kind, K, T>
