@@ -101,12 +101,10 @@ mod tests {
     fn bench_option_map_kind(b: &mut Bencher) {
         b.iter(|| {
             let n = black_box(1000);
-            (0..n).into_iter().map(|i| {
-                if i % 2 == 0 {
-                    None.into_kind().map_kind::<VecKind>()
-                } else {
-                    Some(i).into_kind().map_kind::<VecKind>()
-                }
+            (0..n).into_iter().map(|i| if i % 2 == 0 {
+                None.into_kind().map_kind::<VecKind>()
+            } else {
+                Some(i).into_kind().map_kind::<VecKind>()
             })
         })
     }
@@ -121,12 +119,10 @@ mod tests {
     fn bench_option_to_vec_native(b: &mut Bencher) {
         b.iter(|| {
             let n = black_box(1000);
-            (0..n).into_iter().map(|i| {
-                if i % 2 == 0 {
-                    native_convert(None)
-                } else {
-                    native_convert(Some(i))
-                }
+            (0..n).into_iter().map(|i| if i % 2 == 0 {
+                native_convert(None)
+            } else {
+                native_convert(Some(i))
             })
         })
     }

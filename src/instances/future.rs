@@ -8,14 +8,11 @@ use kind::Reify;
 use kinds::FutureKind;
 
 impl<Z> Functor<FutureKind, Z> for FutureKind {
-    fn map<'kind, F, A, B>(a: Kind<'kind, FutureKind, A, Z>, f: F) -> Kind<FutureKind, B, Z>
+    fn map<'f_, FnAb, A, B>(fa: Kind<'f_, FutureKind, A, Z>, fn_ab: FnAb) -> Kind<FutureKind, B, Z>
     where
-        F: FnMut(A) -> B + 'kind,
+        FnAb: FnOnce(A) -> B + 'f_,
     {
-        let fut: Box<Future<Item = A, Error = Z>> = a.reify();
-        let r = fut.map(f);
-        let k = Kind::Future::<FutureKind, B, Z>(Box::new(r));
-        k
+        Kind::Future::<FutureKind, B, Z>(Box::new(fa.reify().map(fn_ab)))
     }
 }
 

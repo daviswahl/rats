@@ -11,12 +11,12 @@ pub trait EmptyType {}
 impl EmptyType for Empty {}
 
 #[allow(dead_code)]
-pub enum Kind<'kind, F_: HKT, A: 'kind, B: 'kind = Empty> {
+pub enum Kind<'f_, F_: HKT, A: 'f_, B: 'f_ = Empty> {
     Vec(Vec<A>),
     Option(Option<A>),
     Id(Id<A>),
     Result(Result<A, B>),
-    Future(Box<dyn Future<Item = A, Error = B> + 'kind>),
+    Future(Box<Future<Item = A, Error = B> + 'f_>),
     // Is this valid? also need to understand which pointer type to use here
     __MARKER(PhantomData<*const F_>),
 }

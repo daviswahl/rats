@@ -56,7 +56,10 @@ impl<'kind, A: 'kind, B: 'kind> IntoKind<'kind, ResultKind, A, B> for Result<A, 
 use futures::future::Future;
 impl<'kind, A: 'kind, B: 'kind, F_> IntoKind<'kind, FutureKind, A, B> for F_
 where
-    F_: Future<Item = A, Error = B>,
+    F_: Future<
+        Item = A,
+        Error = B,
+    >,
     F_: 'static,
 {
     type Kind = FutureKind;

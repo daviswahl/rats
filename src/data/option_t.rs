@@ -21,8 +21,6 @@ where
         F: Functor<F, Z>,
         Func: Fn(A) -> B,
     {
-        //let r = F::map::<'kind, Func, Self, B>(self.value, |a| a.map(f));
-        //OptionT { value: r }
         unimplemented!();
     }
 }
