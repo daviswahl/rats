@@ -4,14 +4,18 @@ pub trait Applicative<F_>: Functor<F_>
 where
     F_: Functor<F_>,
 {
+    /// (F<A>, F<FnOnce(A) -> B>) -> F<B>
     fn ap<'f_, A: 'f_, B: 'f_, Fn_>(
         fa: Kind<'f_, F_, A>,
         ffn: Kind<'f_, F_, Fn_>,
     ) -> Kind<'f_, F_, B>
     where
         Fn_: FnOnce(A) -> B;
+
+    /// A -> F<A>
     fn point<'f_, A: 'f_>(value: A) -> Kind<'f_, F_, A>;
 
+    /// (F<A>, F<B>) -> F<(A,B)>
     fn product<'f_, A: 'f_, B: 'f_>(
         fa: Kind<'f_, F_, A>,
         fb: Kind<'f_, F_, B>,
@@ -21,13 +25,14 @@ where
         Self::ap(fb, fab)
     }
 
-    fn map2<'f_, Fn_, A, B, Z>(
+    /// (F<A>, F<B>, Fn((A,B)) -> C) -> F<C>
+    fn map2<'f_, Fn_, A, B, C>(
         fa: Kind<'f_, F_, A>,
         fb: Kind<'f_, F_, B>,
         fn_: Fn_,
-    ) -> Kind<'f_, F_, Z>
+    ) -> Kind<'f_, F_, C>
     where
-        Fn_: Fn((A, B)) -> Z + 'f_,
+        Fn_: Fn((A, B)) -> C + 'f_,
     {
         F_::map(Self::product(fa, fb), fn_)
     }

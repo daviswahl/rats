@@ -35,5 +35,5 @@ pub trait IntoKind<'kind, F_: HKT, A: 'kind, B: 'kind = Empty> {
 
 pub trait AsKind<F_: HKT, A, B = Empty> {
     type Kind: HKT;
-    fn as_kind(&self) -> &Kind<F_, A, B>;
+    fn as_kind(&self) -> Kind<F_, &A, &B>;
 }

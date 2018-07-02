@@ -4,6 +4,7 @@ use kind::{IntoKind, Kind, Reify};
 use kinds::OptionKind;
 
 impl Functor<OptionKind> for OptionKind {
+    /// (Option<A>, Fn(A) -> B) -> Option<B>
     fn map<'f_, Fn_, A, B>(a: Kind<'f_, OptionKind, A>, f: Fn_) -> Kind<'f_, OptionKind, B>
     where
         Fn_: FnOnce(A) -> B + 'f_,
@@ -12,7 +13,7 @@ impl Functor<OptionKind> for OptionKind {
     }
 }
 
-type OptionK<'kind, A> = Kind<'kind, OptionKind, A>;
+type OptionK<'f_, A> = Kind<'f_, OptionKind, A>;
 impl Applicative<OptionKind> for OptionKind {
     fn ap<'f_, A, B, Fn_>(fa: OptionK<A>, ff: OptionK<Fn_>) -> OptionK<'f_, B>
     where

@@ -3,12 +3,13 @@ use kind::Kind;
 use kind::HKT;
 
 pub trait Functor<F_: HKT, Z = Empty>: HKT {
+    /// (F<(A,)>, Fn(A) -> B) -> F<B,>
     fn map<'f_, Fn_, A, B>(a: Kind<'f_, F_, A, Z>, f: Fn_) -> Kind<'f_, F_, B, Z>
     where
         Fn_: Fn(A) -> B + 'f_;
 }
 
-pub trait KindFunctorExt<'f_, F_, Z = Empty>
+pub trait KindFunctorExt<'f_, F_, Z>
 where
     F_: Functor<F_, Z>,
 {

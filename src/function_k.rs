@@ -6,6 +6,7 @@ use kinds::{OptionKind, VecKind};
 
 pub trait FunctionK<F_: HKT, G_: HKT, Z = Empty>: HKT {
     type ZOut;
+    /// F<A,> -> G<A,>
     fn map_kind<A>(fa: Kind<F_, A, Z>) -> Kind<G_, A, Self::ZOut>;
 }
 

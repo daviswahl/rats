@@ -4,12 +4,12 @@ use kind::Kind;
 use kind::Reify;
 use kinds::FutureKind;
 
-impl<Z> Functor<FutureKind, Z> for FutureKind {
-    fn map<'f_, FnAb, A, B>(fa: Kind<'f_, FutureKind, A, Z>, fn_ab: FnAb) -> Kind<FutureKind, B, Z>
+impl <Z> Functor<FutureKind, Z> for FutureKind {
+    fn map<'f_, Fn_, A, B>(fa: Kind<'f_, FutureKind, A, Z>, fn_: Fn_) -> Kind<FutureKind, B, Z>
     where
-        FnAb: FnOnce(A) -> B + 'f_,
+        Fn_: FnOnce(A) -> B + 'f_,
     {
-        Kind::Future::<FutureKind, B, Z>(Box::new(fa.reify().map(fn_ab)))
+        Kind::Future::<FutureKind, B, Z>(Box::new(fa.reify().map(fn_)))
     }
 }
 
