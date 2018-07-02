@@ -2,7 +2,7 @@
 name = "rats"
 version = "0.0.1"
 authors = ["Davis Wahl <daviswahl@gmail.com>"]
-description = "An experiemental functional programming library for rust"
+description = "An experiemental functional programming library for Rust. WIP."
 license = "MIT"
 
 [dependencies]
