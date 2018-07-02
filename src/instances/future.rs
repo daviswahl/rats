@@ -8,6 +8,7 @@ use applicative::Applicative;
 use kind::IntoKind;
 
 type FutureK<'f_, A, B> = Kind<'f_, FutureKind, A, B>;
+
 impl<'f_, Z> Functor<'f_, FutureKind, Z> for FutureKind {
     fn map<Fn_, A, B>(fa: FutureK<'f_, A, Z>, fn_: Fn_) -> FutureK<B, Z>
     where

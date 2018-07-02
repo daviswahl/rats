@@ -5,7 +5,6 @@ use std::fmt;
 use std::fmt::{Debug, Formatter};
 
 // pub mod option_t;
-pub mod custom_kind;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct VecKind;

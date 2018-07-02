@@ -1,7 +1,3 @@
-
-
-
-
 #[cfg(test)]
 mod tests {
     use kind::HKT;
