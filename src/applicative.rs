@@ -40,8 +40,10 @@ where
 
 pub trait ApplicativeKindExt<'f_, F_: Applicative<F_>> {
     type A;
+    /// (Self, F<B>) -> F<(Self::A,B)>
     fn product<B>(self, fb: Kind<'f_, F_, B>) -> Kind<'f_, F_, (Self::A, B)>;
 
+    /// (Self, F<Fn(Self::A) -> B>) -> F<B>
     fn ap<B, Fn_>(self, ffn: Kind<'f_, F_, Fn_>) -> Kind<'f_, F_, B>
     where
         Fn_: FnOnce(Self::A) -> B;
@@ -52,10 +54,12 @@ where
     F_: Applicative<F_>,
 {
     type A = A;
+    /// (Self<A>, F<B>) -> F<(A,B)> where Self: F_
     fn product<B>(self, fb: Kind<'f_, F_, B>) -> Kind<'f_, F_, (Self::A, B)> {
         F_::product(self, fb)
     }
 
+    /// (Self<A>, F<Fn(A) -> B>) -> F<B> where Self: F
     fn ap<B, Fn_>(self, ffn: Kind<'f_, F_, Fn_>) -> Kind<'f_, F_, B>
     where
         Fn_: FnOnce(Self::A) -> B,
@@ -66,6 +70,7 @@ where
 
 pub trait Point<'f_> {
     type Out;
+    /// Self -> F<Self> where F: Applicative
     fn point<F_>(self) -> Kind<'f_, F_, Self::Out>
     where
         F_: Applicative<F_>;
@@ -73,6 +78,7 @@ pub trait Point<'f_> {
 
 impl<'f_, A: 'f_> Point<'f_> for A {
     type Out = A;
+    /// A -> F<B>
     fn point<F_: Applicative<F_>>(self) -> Kind<'f_, F_, A> {
         F_::point::<A>(self)
     }

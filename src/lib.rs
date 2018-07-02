@@ -19,6 +19,7 @@ pub mod traverse;
 pub fn identity<A>(a: A) -> A {
     a
 }
+
 #[cfg(test)]
 mod tests {
     use function_k::KindFunctionKExt;
