@@ -16,6 +16,8 @@ pub mod kind;
 pub mod kinds;
 pub mod traverse;
 
+mod scratch;
+
 pub fn identity<A>(a: A) -> A {
     a
 }
