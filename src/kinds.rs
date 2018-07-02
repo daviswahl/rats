@@ -56,14 +56,22 @@ impl<'f_, A: 'f_, B: 'f_> IntoKind<'f_, ResultKind, A, B> for Result<A, B> {
     }
 }
 
-impl<'f_, A: 'f_, B: 'f_, F_> IntoKind<'f_, FutureKind, A, B> for F_
+impl<'f_, A: 'f_, B: 'f_, F_: 'f_> IntoKind<'f_, FutureKind, A, B> for F_
 where
     F_: Future<Item = A, Error = B>,
-    F_: 'static,
 {
-    type Kind = FutureKind;
-    fn into_kind(self) -> Kind<'f_, FutureKind, A, B> {
+    default type Kind = FutureKind;
+    default fn into_kind(self) -> Kind<'f_, FutureKind, A, B> {
         Kind::Future::<FutureKind, A, B>(Box::new(self))
+    }
+}
+
+impl<'f_, A: 'f_, B: 'f_>  IntoKind<'f_, FutureKind, A, B> for Box<Future<Item=A, Error=B>>
+where
+{
+     type Kind = FutureKind;
+     fn into_kind(self) -> Kind<'f_, FutureKind, A, B> {
+        Kind::Future::<FutureKind, A, B>(self)
     }
 }
 

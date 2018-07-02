@@ -3,13 +3,36 @@ use futures::FutureExt;
 use kind::Kind;
 use kind::Reify;
 use kinds::FutureKind;
+use futures::future;
+use futures::future::AndThen;
+use applicative::Applicative;
+use kind::IntoKind;
 
+type FutureK<'f_, A,B> = Kind<'f_, FutureKind,A,B>;
 impl <Z> Functor<FutureKind, Z> for FutureKind {
-    fn map<'f_, Fn_, A, B>(fa: Kind<'f_, FutureKind, A, Z>, fn_: Fn_) -> Kind<FutureKind, B, Z>
+    fn map<'f_, Fn_, A, B>(fa: FutureK<'f_, A,Z>, fn_: Fn_) -> FutureK<B,Z>
     where
         Fn_: FnOnce(A) -> B + 'f_,
     {
         Kind::Future::<FutureKind, B, Z>(Box::new(fa.reify().map(fn_)))
+    }
+}
+
+impl <Z> Applicative<FutureKind, Z> for FutureKind {
+    fn ap<'f_, A: 'f_, B: 'f_, Fn_>(fa: FutureK<'f_, A, Z>, ff: FutureK<'f_, Fn_, Z>) -> FutureK<'f_, B, Z>
+        where
+            Fn_: FnOnce(A) -> B,
+    {
+        let fa = fa.reify();
+        let ff = ff.reify();
+        let fb = fa.and_then(|fa| ff.map(|ff| ff(fa)));
+
+        Kind::Future(Box::new(fb))
+
+    }
+
+    fn point<'f_, A>(a: A) -> FutureK<'f_, A,Z> {
+        future::ok(a).into_kind()
     }
 }
 

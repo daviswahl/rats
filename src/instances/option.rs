@@ -40,9 +40,18 @@ mod tests {
         assert_eq!(Some(5), f.reify());
     }
 
+    /// The `show_off_kind_tupler` fn is clearly silly: we can just use a.product(b) directly,
+    /// however, the point of kind level programming is that we're able to talk about
+    /// these behavior generically: We can tuple a kind as long as that kind implements Applicative.
+    ///
+    /// (F<A>, F<B>) -> F<(A,B>)
+    /// where F: Applicative
     fn show_off_kind_tupler<'f_, F_, A, B>(
+        // F<A>
         a: Kind<'f_, F_, A>,
+        // F<B>
         b: Kind<'f_, F_, B>,
+        // F<(A,B)>
     ) -> Kind<'f_, F_, (A, B)>
     where
         F_: Applicative<F_>,
@@ -52,17 +61,28 @@ mod tests {
 
     #[test]
     fn test_kind_tupler() {
-        // type annotations are not necessary here, they're just for the reader
-        let a = 5.point::<OptionKind>();
-        let b = "rats".point::<OptionKind>();
+        // Type annotations on the left hand side are not necessary, just for illustrative purposes.
+        let a: Kind<OptionKind, i32> = 5.point::<OptionKind>();
+        let b: Kind<OptionKind, &str> = "rats".point::<OptionKind>();
         let ab = show_off_kind_tupler(a, b).reify();
         assert_eq!(ab, Some((5, "rats")));
 
         use kinds::IdKind;
         let a = 5.point::<IdKind>();
         let b = "rats".point::<IdKind>();
-        let k = show_off_kind_tupler(a, b).reify().take();
-        assert_eq!(k, (5, "rats"))
+        let ab = show_off_kind_tupler(a, b).reify().take();
+        assert_eq!(ab, (5, "rats"));
+
+        use kinds::FutureKind;
+        use futures::future;
+        use futures::executor::ThreadPool;
+        use futures::future::FutureResult;
+
+        let a = 5.point::<FutureKind>();
+        let b = "rats".point::<FutureKind>();
+        let ab = show_off_kind_tupler(a,b).reify();
+        let ab = ThreadPool::new().unwrap().run(ab).unwrap();
+        assert_eq!(ab, (5, "rats"))
     }
 
     #[test]
