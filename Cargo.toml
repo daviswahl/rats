@@ -2,6 +2,8 @@
 name = "rats"
 version = "0.0.1"
 authors = ["Davis Wahl <daviswahl@gmail.com>"]
+description = "An experiemental functional programming library for rust"
+license = "MIT"
 
 [dependencies]
 futures-preview = "0.2.2"
