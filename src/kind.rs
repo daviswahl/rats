@@ -3,29 +3,27 @@ use futures::future::Future;
 use std::marker::PhantomData;
 use std::any::Any;
 
-pub trait HKT: Sized + 'static {}
+pub trait HKT: Sized + 'static {
+    type Kind: HKT;
+}
+
+pub trait AnyKind<A, B = Empty>: 'static {
+    type Out;
+    type Kind: HKT;
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Empty;
-impl HKT for Empty {}
-
-//pub struct AnyKind<A,B> {
-//    any: Box<Any + 'static>,
-//    a: PhantomData<*const A>,
-//    b: PhantomData<*const B>
-//}
-//
-//impl<A,B> AnyKind<A,B> {
-//    pub fn downcast<Target: 'static>(self) -> Target {
-//        *self.any.downcast().unwrap()
-//    }
-//}
+impl HKT for Empty {
+    type Kind = Empty;
+}
 
 #[allow(dead_code)]
 pub enum Kind<'f_, F_: HKT, A, B = Empty>
-where F_: HKT,
-      A: 'f_,
-      B: 'f_,
+where
+    F_: HKT,
+    A: 'f_,
+    B: 'f_,
 {
     Vec(Vec<A>),
     Option(Option<A>),
@@ -37,9 +35,9 @@ where F_: HKT,
     __MARKER(PhantomData<*const F_>),
 }
 
-pub trait Reify<F_: HKT, A, B = Empty> {
+pub trait ReifyKind<'f_, F_: HKT, A, B = Empty> {
     type Out;
-    fn reify(self) -> Self::Out;
+    fn reify(fa: Kind<'f_, F_, A, B>) -> Self::Out;
 }
 
 pub trait ReifyRef<F_: HKT, A, B = Empty> {
@@ -60,4 +58,20 @@ pub trait AsKind<F_: HKT, A, B = Empty> {
 pub trait IntoAnyKind<F_: HKT, A: 'static, B: 'static = Empty> {
     type Kind: HKT;
     fn into_kind(self) -> Kind<'static, F_, A, B>;
+}
+
+pub trait Reify<'f_, F_: HKT, A, B = Empty>
+where
+    F_: ReifyKind<'f_, F_, A, B>,
+{
+    fn reify(self) -> F_::Out;
+}
+
+impl<'f_, F_, A, B> Reify<'f_, F_, A, B> for Kind<'f_, F_, A, B>
+where
+    F_: HKT + ReifyKind<'f_, F_, A, B>,
+{
+    fn reify(self) -> F_::Out {
+        F_::reify(self)
+    }
 }

@@ -2,7 +2,10 @@ use applicative::Applicative;
 use functor::Functor;
 use kind::Kind;
 
-pub trait Traverse<F_>: Functor<F_> where F_: Functor<F_> {
+pub trait Traverse<F_>: Functor<F_>
+where
+    F_: Functor<F_>,
+{
     /// (F<A>, λ) -> G<F<B>>
     /// where
     /// G: Applicative
@@ -34,7 +37,6 @@ impl<'f_, F_, A> TraverseExt<'f_, F_> for Kind<'f_, F_, A>
 where
     F_: Traverse<F_>,
 {
-
     /// (Self<A>, λ) -> G<Self<A>>
     /// where
     /// Self: F

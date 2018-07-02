@@ -39,7 +39,10 @@ where
     }
 }
 
-pub trait ApplicativeKindExt<'f_, F_, Z = Empty> where F_: Applicative<F_, Z> {
+pub trait ApplicativeKindExt<'f_, F_, Z = Empty>
+where
+    F_: Applicative<F_, Z>,
+{
     type A;
     /// (Self, F<B>) -> F<(Self::A,B)>
     fn product<B>(self, fb: Kind<'f_, F_, B, Z>) -> Kind<'f_, F_, (Self::A, B), Z>;

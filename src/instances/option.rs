@@ -78,7 +78,7 @@ mod tests {
 
         let a = 5.point::<FutureKind>();
         let b = "rats".point::<FutureKind>();
-        let ab = show_off_kind_tupler(a,b).reify();
+        let ab = show_off_kind_tupler(a, b).reify();
         let ab = ThreadPool::new().unwrap().run(ab).unwrap();
         assert_eq!(ab, (5, "rats"))
     }
