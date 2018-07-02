@@ -8,10 +8,10 @@ use kind::Reify;
 use kinds::VecKind;
 use traverse::Traverse;
 
-impl Functor<VecKind> for VecKind {
-    fn map<'kind, F, A, B>(a: Kind<'kind, VecKind, A>, f: F) -> Kind<'kind, VecKind, B>
+impl<'f_> Functor<'f_, VecKind> for VecKind {
+    fn map<F, A, B>(a: Kind<'f_, VecKind, A>, f: F) -> Kind<'f_, VecKind, B>
     where
-        F: FnMut(A) -> B + 'kind,
+        F: FnMut(A) -> B + 'f_,
     {
         a.reify().into_iter().map(f).collect::<Vec<B>>().into_kind()
     }
@@ -31,13 +31,13 @@ impl Foldable<VecKind> for VecKind {
     }
 }
 
-impl Traverse<VecKind> for VecKind {
-    fn traverse<'f_, FnAGb, G_, A, B>(
+impl<'f_> Traverse<'f_, VecKind> for VecKind {
+    fn traverse<FnAGb, G_, A, B>(
         fa: Kind<'f_, VecKind, A>,
         fn_a_gb: FnAGb,
     ) -> Kind<'f_, G_, Kind<'f_, VecKind, B>>
     where
-        G_: Applicative<G_>,
+        G_: Applicative<'f_, G_>,
         FnAGb: Fn(A) -> Kind<'f_, G_, B>,
     {
         let acc = vec![].into_kind().point::<G_>();

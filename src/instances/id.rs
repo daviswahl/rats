@@ -4,12 +4,12 @@ use functor::Functor;
 use kind::{IntoKind, Kind, Reify};
 use kinds::IdKind;
 
-impl Applicative<IdKind> for IdKind {
-    fn point<'f_, A>(a: A) -> Kind<'f_, IdKind, A> {
+impl <'f_> Applicative<'f_, IdKind> for IdKind {
+    fn point<A>(a: A) -> Kind<'f_, IdKind, A> {
         Id(a).into_kind()
     }
 
-    fn ap<'f_, A: 'f_, B: 'f_, FnAb>(
+    fn ap<A: 'f_, B: 'f_, FnAb>(
         fa: Kind<'f_, IdKind, A>,
         ff: Kind<'f_, IdKind, FnAb>,
     ) -> Kind<'f_, IdKind, B>
@@ -22,8 +22,8 @@ impl Applicative<IdKind> for IdKind {
     }
 }
 
-impl Functor<IdKind> for IdKind {
-    fn map<'f_, F, A, B>(a: Kind<'f_, IdKind, A>, f: F) -> Kind<'f_, IdKind, B>
+impl <'f_> Functor<'f_, IdKind> for IdKind {
+    fn map<F, A, B>(a: Kind<'f_, IdKind, A>, f: F) -> Kind<'f_, IdKind, B>
     where
         F: Fn(A) -> B + 'f_,
     {

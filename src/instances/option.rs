@@ -3,9 +3,9 @@ use functor::Functor;
 use kind::{IntoKind, Kind, Reify};
 use kinds::OptionKind;
 
-impl Functor<OptionKind> for OptionKind {
+impl<'f_> Functor<'f_, OptionKind> for OptionKind {
     /// (Option<A>, Fn(A) -> B) -> Option<B>
-    fn map<'f_, Fn_, A, B>(a: Kind<'f_, OptionKind, A>, f: Fn_) -> Kind<'f_, OptionKind, B>
+    fn map<Fn_, A, B>(a: Kind<'f_, OptionKind, A>, f: Fn_) -> Kind<'f_, OptionKind, B>
     where
         Fn_: FnOnce(A) -> B + 'f_,
     {
@@ -14,8 +14,8 @@ impl Functor<OptionKind> for OptionKind {
 }
 
 type OptionK<'f_, A> = Kind<'f_, OptionKind, A>;
-impl Applicative<OptionKind> for OptionKind {
-    fn ap<'f_, A, B, Fn_>(fa: OptionK<A>, ff: OptionK<Fn_>) -> OptionK<'f_, B>
+impl<'f_> Applicative<'f_, OptionKind> for OptionKind {
+    fn ap<A, B, Fn_>(fa: OptionK<A>, ff: OptionK<Fn_>) -> OptionK<'f_, B>
     where
         Fn_: FnOnce(A) -> B,
     {
@@ -24,7 +24,7 @@ impl Applicative<OptionKind> for OptionKind {
         fa.and_then(|fa| ff.map(|ff| ff(fa))).into_kind()
     }
 
-    fn point<'f_, A>(a: A) -> Kind<'f_, OptionKind, A> {
+    fn point<A>(a: A) -> Kind<'f_, OptionKind, A> {
         Some(a).into_kind()
     }
 }
@@ -54,7 +54,7 @@ mod tests {
         // F<(A,B)>
     ) -> Kind<'f_, F_, (A, B)>
     where
-        F_: Applicative<F_>,
+        F_: Applicative<'f_, F_>,
     {
         a.product(b)
     }

@@ -3,8 +3,8 @@ use functor::Functor;
 use kind::{Empty, IntoKind, Kind, Reify, HKT};
 use kinds::{OptionKind, ResultKind};
 
-impl<Z> Functor<ResultKind, Z> for ResultKind {
-    fn map<'f_, Fn_, A, B>(a: Kind<'f_, ResultKind, A, Z>, f: Fn_) -> Kind<'f_, ResultKind, B, Z>
+impl<'f_, Z> Functor<'f_, ResultKind, Z> for ResultKind {
+    fn map<Fn_, A, B>(a: Kind<'f_, ResultKind, A, Z>, f: Fn_) -> Kind<'f_, ResultKind, B, Z>
     where
         Fn_: FnOnce(A) -> B + 'f_,
     {

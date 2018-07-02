@@ -1,12 +1,12 @@
 use functor::Functor;
 use kind::Kind;
 use kind::Empty;
-pub trait Applicative<F_, Z = Empty>: Functor<F_, Z>
+pub trait Applicative<'f_, F_, Z = Empty>: Functor<'f_, F_, Z>
 where
-    F_: Functor<F_, Z>,
+    F_: Functor<'f_, F_, Z>,
 {
     /// (F<A>, F<FnOnce(A) -> B>) -> F<B>
-    fn ap<'f_, A: 'f_, B: 'f_, Fn_>(
+    fn ap<A: 'f_, B: 'f_, Fn_>(
         fa: Kind<'f_, F_, A, Z>,
         ffn: Kind<'f_, F_, Fn_, Z>,
     ) -> Kind<'f_, F_, B, Z>
@@ -14,10 +14,10 @@ where
         Fn_: FnOnce(A) -> B;
 
     /// A -> F<A>
-    fn point<'f_, A: 'f_>(a: A) -> Kind<'f_, F_, A, Z>;
+    fn point<A: 'f_>(a: A) -> Kind<'f_, F_, A, Z>;
 
     /// (F<A>, F<B>) -> F<(A,B)>
-    fn product<'f_, A: 'f_, B: 'f_>(
+    fn product<A: 'f_, B: 'f_>(
         fa: Kind<'f_, F_, A, Z>,
         fb: Kind<'f_, F_, B, Z>,
     ) -> Kind<'f_, F_, (A, B), Z> {
@@ -27,7 +27,7 @@ where
     }
 
     /// (F<A>, F<B>, Fn((A,B)) -> C) -> F<C>
-    fn map2<'f_, Fn_, A, B, C>(
+    fn map2<Fn_, A, B, C>(
         fa: Kind<'f_, F_, A, Z>,
         fb: Kind<'f_, F_, B, Z>,
         fn_: Fn_,
@@ -41,7 +41,7 @@ where
 
 pub trait ApplicativeKindExt<'f_, F_, Z = Empty>
 where
-    F_: Applicative<F_, Z>,
+    F_: Applicative<'f_, F_, Z>,
 {
     type A;
     /// (Self, F<B>) -> F<(Self::A,B)>
@@ -55,7 +55,7 @@ where
 
 impl<'f_, F_, A, Z> ApplicativeKindExt<'f_, F_, Z> for Kind<'f_, F_, A, Z>
 where
-    F_: Applicative<F_, Z>,
+    F_: Applicative<'f_, F_, Z>,
 {
     type A = A;
     /// (Self<A>, F<B>) -> F<(A,B)> where Self: F_
@@ -77,13 +77,13 @@ pub trait Point<'f_> {
     /// Self -> F<Self> where F: Applicative
     fn point<F_>(self) -> Kind<'f_, F_, Self::Out>
     where
-        F_: Applicative<F_>;
+        F_: Applicative<'f_, F_>;
 }
 
 impl<'f_, A: 'f_> Point<'f_> for A {
     type Out = A;
     /// A -> F<B>
-    fn point<F_: Applicative<F_>>(self) -> Kind<'f_, F_, A> {
+    fn point<F_: Applicative<'f_, F_>>(self) -> Kind<'f_, F_, A> {
         F_::point::<A>(self)
     }
 }
