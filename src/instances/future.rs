@@ -4,7 +4,6 @@ use kind::Kind;
 use kind::Reify;
 use kinds::FutureKind;
 use futures::future;
-use futures::future::AndThen;
 use applicative::Applicative;
 use kind::IntoKind;
 

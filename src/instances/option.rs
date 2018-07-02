@@ -74,9 +74,7 @@ mod tests {
         assert_eq!(ab, (5, "rats"));
 
         use kinds::FutureKind;
-        use futures::future;
         use futures::executor::ThreadPool;
-        use futures::future::FutureResult;
 
         let a = 5.point::<FutureKind>();
         let b = "rats".point::<FutureKind>();

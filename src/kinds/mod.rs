@@ -4,6 +4,9 @@ use kind::{IntoKind, Kind, Reify, ReifyRef, HKT};
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 
+// pub mod option_t;
+pub mod custom_kind;
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct VecKind;
 impl HKT for VecKind {}
@@ -23,10 +26,6 @@ impl HKT for ResultKind {}
 #[derive(Clone, Debug, PartialEq)]
 pub struct FutureKind;
 impl HKT for FutureKind {}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct OptionTKind;
-impl HKT for OptionTKind {}
 
 impl<'f_, A: 'f_> IntoKind<'f_, VecKind, A> for Vec<A> {
     type Kind = VecKind;
