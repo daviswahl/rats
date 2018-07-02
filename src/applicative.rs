@@ -1,12 +1,15 @@
 use functor::Functor;
-use kind::{Kind, HKT};
-pub trait Applicative<F_: HKT>: Functor<F_> {
-    fn ap<'f_, A: 'f_, B: 'f_, FnAb>(
+use kind::Kind;
+pub trait Applicative<F_>: Functor<F_>
+where
+    F_: Functor<F_>,
+{
+    fn ap<'f_, A: 'f_, B: 'f_, Fn_>(
         fa: Kind<'f_, F_, A>,
-        ff: Kind<'f_, F_, FnAb>,
+        ffn: Kind<'f_, F_, Fn_>,
     ) -> Kind<'f_, F_, B>
     where
-        FnAb: FnOnce(A) -> B;
+        Fn_: FnOnce(A) -> B;
     fn point<'f_, A: 'f_>(value: A) -> Kind<'f_, F_, A>;
 
     fn product<'f_, A: 'f_, B: 'f_>(
@@ -18,41 +21,41 @@ pub trait Applicative<F_: HKT>: Functor<F_> {
         Self::ap(fb, fab)
     }
 
-    fn map2<'f_, FnAbz, A, B, Z>(
+    fn map2<'f_, Fn_, A, B, Z>(
         fa: Kind<'f_, F_, A>,
         fb: Kind<'f_, F_, B>,
-        fn_abz: FnAbz,
+        fn_: Fn_,
     ) -> Kind<'f_, F_, Z>
     where
-        FnAbz: Fn((A, B)) -> Z + 'f_,
+        Fn_: Fn((A, B)) -> Z + 'f_,
     {
-        Self::map(Self::product(fa, fb), fn_abz)
+        F_::map(Self::product(fa, fb), fn_)
     }
 }
 
-pub trait ApplicativeKindExt<'_f, F_: Applicative<F_>> {
-    type Item;
-    fn product<B>(self, fb: Kind<'_f, F_, B>) -> Kind<'_f, F_, (Self::Item, B)>;
+pub trait ApplicativeKindExt<'f_, F_: Applicative<F_>> {
+    type A;
+    fn product<B>(self, fb: Kind<'f_, F_, B>) -> Kind<'f_, F_, (Self::A, B)>;
 
-    fn ap<B, FnAb>(self, ff: Kind<'_f, F_, FnAb>) -> Kind<'_f, F_, B>
+    fn ap<B, Fn_>(self, ffn: Kind<'f_, F_, Fn_>) -> Kind<'f_, F_, B>
     where
-        FnAb: FnOnce(Self::Item) -> B;
+        Fn_: FnOnce(Self::A) -> B;
 }
 
 impl<'f_, F_, A> ApplicativeKindExt<'f_, F_> for Kind<'f_, F_, A>
 where
     F_: Applicative<F_>,
 {
-    type Item = A;
-    fn product<B>(self, fb: Kind<'f_, F_, B>) -> Kind<'f_, F_, (Self::Item, B)> {
+    type A = A;
+    fn product<B>(self, fb: Kind<'f_, F_, B>) -> Kind<'f_, F_, (Self::A, B)> {
         F_::product(self, fb)
     }
 
-    fn ap<B, FnAb>(self, ff: Kind<'f_, F_, FnAb>) -> Kind<'f_, F_, B>
+    fn ap<B, Fn_>(self, ffn: Kind<'f_, F_, Fn_>) -> Kind<'f_, F_, B>
     where
-        FnAb: FnOnce(Self::Item) -> B,
+        Fn_: FnOnce(Self::A) -> B,
     {
-        F_::ap(self, ff)
+        F_::ap(self, ffn)
     }
 }
 
@@ -60,12 +63,12 @@ pub trait Point<'f_> {
     type Out;
     fn point<F_>(self) -> Kind<'f_, F_, Self::Out>
     where
-        F_: HKT + Applicative<F_>;
+        F_: Applicative<F_>;
 }
 
 impl<'f_, A: 'f_> Point<'f_> for A {
     type Out = A;
-    fn point<F_: HKT + Applicative<F_>>(self) -> Kind<'f_, F_, A> {
+    fn point<F_: Applicative<F_>>(self) -> Kind<'f_, F_, A> {
         F_::point::<A>(self)
     }
 }

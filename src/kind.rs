@@ -7,9 +7,6 @@ pub trait HKT: Sized + 'static {}
 #[derive(Clone, Debug, PartialEq)]
 pub struct Empty;
 
-pub trait EmptyType {}
-impl EmptyType for Empty {}
-
 #[allow(dead_code)]
 pub enum Kind<'f_, F_: HKT, A: 'f_, B: 'f_ = Empty> {
     Vec(Vec<A>),

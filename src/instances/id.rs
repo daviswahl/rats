@@ -5,16 +5,16 @@ use kind::{IntoKind, Kind, Reify};
 use kinds::IdKind;
 
 impl Applicative<IdKind> for IdKind {
-    fn point<'kind, A>(a: A) -> Kind<'kind, IdKind, A> {
+    fn point<'f_, A>(a: A) -> Kind<'f_, IdKind, A> {
         Id(a).into_kind()
     }
 
-    fn ap<'kind, A: 'kind, B: 'kind, F>(
-        fa: Kind<'kind, IdKind, A>,
-        ff: Kind<'kind, IdKind, F>,
-    ) -> Kind<'kind, IdKind, B>
+    fn ap<'f_, A: 'f_, B: 'f_, FnAb>(
+        fa: Kind<'f_, IdKind, A>,
+        ff: Kind<'f_, IdKind, FnAb>,
+    ) -> Kind<'f_, IdKind, B>
     where
-        F: FnOnce(A) -> B,
+        FnAb: FnOnce(A) -> B,
     {
         let fa = fa.reify().take();
         let ff = ff.reify().take();
@@ -23,9 +23,9 @@ impl Applicative<IdKind> for IdKind {
 }
 
 impl Functor<IdKind> for IdKind {
-    fn map<'kind, F, A, B>(a: Kind<'kind, IdKind, A>, f: F) -> Kind<'kind, IdKind, B>
+    fn map<'f_, F, A, B>(a: Kind<'f_, IdKind, A>, f: F) -> Kind<'f_, IdKind, B>
     where
-        F: Fn(A) -> B + 'kind,
+        F: Fn(A) -> B + 'f_,
     {
         f(a.reify().take()).id().into_kind()
     }

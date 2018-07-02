@@ -4,9 +4,9 @@ use kind::{IntoKind, Kind, Reify};
 use kinds::OptionKind;
 
 impl Functor<OptionKind> for OptionKind {
-    fn map<'kind, F, A, B>(a: Kind<'kind, OptionKind, A>, f: F) -> Kind<'kind, OptionKind, B>
+    fn map<'f_, Fn_, A, B>(a: Kind<'f_, OptionKind, A>, f: Fn_) -> Kind<'f_, OptionKind, B>
     where
-        F: FnOnce(A) -> B + 'kind,
+        Fn_: FnOnce(A) -> B + 'f_,
     {
         a.reify().map(f).into_kind()
     }
@@ -14,16 +14,16 @@ impl Functor<OptionKind> for OptionKind {
 
 type OptionK<'kind, A> = Kind<'kind, OptionKind, A>;
 impl Applicative<OptionKind> for OptionKind {
-    fn ap<'kind, A, B, F>(fa: OptionK<A>, ff: OptionK<F>) -> OptionK<'kind, B>
+    fn ap<'f_, A, B, Fn_>(fa: OptionK<A>, ff: OptionK<Fn_>) -> OptionK<'f_, B>
     where
-        F: FnOnce(A) -> B,
+        Fn_: FnOnce(A) -> B,
     {
         let fa = fa.reify();
         let ff = ff.reify();
         fa.and_then(|fa| ff.map(|ff| ff(fa))).into_kind()
     }
 
-    fn point<'kind, A>(a: A) -> Kind<'kind, OptionKind, A> {
+    fn point<'f_, A>(a: A) -> Kind<'f_, OptionKind, A> {
         Some(a).into_kind()
     }
 }
@@ -33,19 +33,18 @@ mod tests {
 
     use super::*;
     use applicative::{ApplicativeKindExt, Point};
-    use kind::HKT;
     #[test]
     fn test_option_pure() {
         let f = 5.point::<OptionKind>();
         assert_eq!(Some(5), f.reify());
     }
 
-    fn show_off_kind_tupler<'kind, K, A, B>(
-        a: Kind<'kind, K, A>,
-        b: Kind<'kind, K, B>,
-    ) -> Kind<'kind, K, (A, B)>
+    fn show_off_kind_tupler<'f_, F_, A, B>(
+        a: Kind<'f_, F_, A>,
+        b: Kind<'f_, F_, B>,
+    ) -> Kind<'f_, F_, (A, B)>
     where
-        K: HKT + Applicative<K>,
+        F_: Applicative<F_>,
     {
         a.product(b)
     }
@@ -53,15 +52,15 @@ mod tests {
     #[test]
     fn test_kind_tupler() {
         // type annotations are not necessary here, they're just for the reader
-        let a: Kind<OptionKind, i32> = 5.point::<OptionKind>();
-        let b: Kind<OptionKind, &str> = "rats".point::<OptionKind>();
-        let k: Option<(i32, &str)> = show_off_kind_tupler(a, b).reify();
-        assert_eq!(k, Some((5, "rats")));
+        let a = 5.point::<OptionKind>();
+        let b = "rats".point::<OptionKind>();
+        let ab = show_off_kind_tupler(a, b).reify();
+        assert_eq!(ab, Some((5, "rats")));
 
         use kinds::IdKind;
-        let a: Kind<IdKind, i32> = 5.point::<IdKind>();
-        let b: Kind<IdKind, &str> = "rats".point::<IdKind>();
-        let k: (i32, &str) = show_off_kind_tupler(a, b).reify().take();
+        let a = 5.point::<IdKind>();
+        let b = "rats".point::<IdKind>();
+        let k = show_off_kind_tupler(a, b).reify().take();
         assert_eq!(k, (5, "rats"))
     }
 

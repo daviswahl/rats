@@ -25,24 +25,24 @@ impl Foldable<VecKind> for VecKind {
     {
         let mut b = b;
         for a in fa.reify() {
-            accum = fn_abb((a, accum));
+            b = fn_abb((a, b));
         }
-        accum
+        b
     }
 }
 
 impl Traverse<VecKind> for VecKind {
-    fn traverse<'kind, F, G, A, B>(
-        fa: Kind<'kind, VecKind, A>,
-        f: F,
-    ) -> Kind<'kind, G, Kind<'kind, VecKind, B>>
+    fn traverse<'f_, FnAGb, G_, A, B>(
+        fa: Kind<'f_, VecKind, A>,
+        fn_a_gb: FnAGb,
+    ) -> Kind<'f_, G_, Kind<'f_, VecKind, B>>
     where
-        G: Applicative<G>,
-        F: Fn(A) -> Kind<'kind, G, B>,
+        G_: Applicative<G_>,
+        FnAGb: Fn(A) -> Kind<'f_, G_, B>,
     {
-        let acc = vec![].into_kind().point::<G>();
+        let acc = vec![].into_kind().point::<G_>();
         VecKind::fold_right(fa, acc, |(a, acc)| {
-            G::map2(f(a), acc, |(a, b)| {
+            G_::map2(fn_a_gb(a), acc, |(a, b)| {
                 // need to add a direct push method
                 let mut v = b.reify();
                 v.push(a);
