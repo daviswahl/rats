@@ -7,16 +7,13 @@ pub trait HKT: Sized + 'static {}
 #[derive(Clone, Debug, PartialEq)]
 pub struct Empty;
 
-pub trait EmptyType {}
-impl EmptyType for Empty {}
-
 #[allow(dead_code)]
-pub enum Kind<'kind, F_: HKT, A: 'kind, B: 'kind = Empty> {
+pub enum Kind<'f_, F_: HKT, A: 'f_, B: 'f_ = Empty> {
     Vec(Vec<A>),
     Option(Option<A>),
     Id(Id<A>),
     Result(Result<A, B>),
-    Future(Box<dyn Future<Item = A, Error = B> + 'kind>),
+    Future(Box<Future<Item = A, Error = B> + 'f_>),
     // Is this valid? also need to understand which pointer type to use here
     __MARKER(PhantomData<*const F_>),
 }
@@ -38,5 +35,5 @@ pub trait IntoKind<'kind, F_: HKT, A: 'kind, B: 'kind = Empty> {
 
 pub trait AsKind<F_: HKT, A, B = Empty> {
     type Kind: HKT;
-    fn as_kind(&self) -> &Kind<F_, A, B>;
+    fn as_kind(&self) -> Kind<F_, &A, &B>;
 }

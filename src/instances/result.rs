@@ -2,11 +2,12 @@ use function_k::FunctionK;
 use functor::Functor;
 use kind::{Empty, IntoKind, Kind, Reify, HKT};
 use kinds::{OptionKind, ResultKind};
+use applicative::Applicative;
 
-impl<Z> Functor<ResultKind, Z> for ResultKind {
-    fn map<'kind, F, A, B>(a: Kind<'kind, ResultKind, A, Z>, f: F) -> Kind<'kind, ResultKind, B, Z>
+impl <Z> Functor<ResultKind, Z> for ResultKind {
+    fn map<'f_, Fn_, A, B>(a: Kind<'f_, ResultKind, A, Z>, f: Fn_) -> Kind<'f_, ResultKind, B, Z>
     where
-        F: FnMut(A) -> B + 'kind,
+        Fn_: FnOnce(A) -> B + 'f_,
     {
         a.reify().map(f).into_kind()
     }
@@ -14,7 +15,7 @@ impl<Z> Functor<ResultKind, Z> for ResultKind {
 
 impl<Z> FunctionK<ResultKind, OptionKind, Z> for ResultKind {
     type ZOut = Empty;
-    fn map_kind<'kind, A>(fa: Kind<'kind, ResultKind, A, Z>) -> Kind<'kind, OptionKind, A, Empty> {
+    fn map_kind<A>(fa: Kind<ResultKind, A, Z>) -> Kind<OptionKind, A, Empty> {
         match fa.reify() {
             Ok(t) => Some(t),
             Err(_) => None,
@@ -22,14 +23,15 @@ impl<Z> FunctionK<ResultKind, OptionKind, Z> for ResultKind {
     }
 }
 
-trait ResultKindExt<'kind, A, B> {
-    fn map_kind<G: HKT>(self) -> Kind<'kind, G, A, Empty>
+trait ResultKindExt<'f_, A, B> {
+    fn map_kind<G_>(self) -> Kind<'f_, G_, A, Empty>
     where
-        ResultKind: FunctionK<ResultKind, G, B, ZOut = Empty>;
+        G_: HKT,
+        ResultKind: FunctionK<ResultKind, G_, B, ZOut = Empty>;
 }
 
-impl<'kind, A, B> ResultKindExt<'kind, A, B> for Kind<'kind, ResultKind, A, B> {
-    fn map_kind<G: HKT>(self) -> Kind<'kind, G, A, Empty>
+impl<'f_, A, B> ResultKindExt<'f_, A, B> for Kind<'f_, ResultKind, A, B> {
+    fn map_kind<G: HKT>(self) -> Kind<'f_, G, A, Empty>
     where
         ResultKind: FunctionK<ResultKind, G, B, ZOut = Empty>,
     {
@@ -37,25 +39,31 @@ impl<'kind, A, B> ResultKindExt<'kind, A, B> for Kind<'kind, ResultKind, A, B> {
     }
 }
 
-trait ResultExt {
-    fn ok<'kind, A>(self) -> Kind<'kind, ResultKind, Self, A>
-    where
-        Self: Sized;
-    fn err<'kind, A>(self) -> Kind<'kind, ResultKind, A, Self>
+trait OkExt {
+    fn ok<E>(&self) -> Kind<ResultKind, &Self, E>
     where
         Self: Sized;
 }
 
-impl<T> ResultExt for T
-where
-    T: Sized,
-{
-    fn ok<'kind, A>(self) -> Kind<'kind, ResultKind, T, A> {
-        Ok::<T, A>(self).into_kind()
-    }
+trait ErrExt {
+    fn err<E>(&self) -> Kind<ResultKind, E, &Self>
+    where
+        Self: Sized;
+}
 
-    fn err<'kind, A>(self) -> Kind<'kind, ResultKind, A, T> {
-        Err::<A, T>(self).into_kind()
+impl<A> OkExt for A
+where
+    A: Sized,
+{
+    fn ok<E>(&self) -> Kind<ResultKind, &A, E> {
+        Ok::<&A, E>(self).into_kind()
+    }
+}
+
+
+impl<E> ErrExt for E {
+    fn err<A>(&self) -> Kind<ResultKind, A, &E> {
+        Err::<A, &E>(self).into_kind()
     }
 }
 
@@ -72,7 +80,7 @@ mod tests {
     #[test]
     fn test_result_function_k() {
         let r = 4.ok::<&str>().map_kind::<OptionKind>().reify();
-        assert_eq!(r, Some(4));
+        assert_eq!(r, Some(&4));
 
         let r = "woop".err::<i32>().map_kind::<OptionKind>().reify();
         assert_eq!(r, None)

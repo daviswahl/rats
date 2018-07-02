@@ -1,35 +1,51 @@
 use applicative::Applicative;
 use functor::Functor;
-use kind::{Kind, HKT};
+use kind::Kind;
 
-pub trait Traverse<F_: HKT>: Functor<F_> {
-    fn traverse<'kind, F, G_, A, B>(
-        fa: Kind<'kind, F_, A>,
-        f: F,
-    ) -> Kind<'kind, G_, Kind<'kind, F_, B>>
+pub trait Traverse<F_>: Functor<F_> where F_: Functor<F_> {
+    /// (F<A>, λ) -> G<F<B>>
+    /// where
+    /// G: Applicative
+    /// λ: Fn(A) -> G<B>
+    fn traverse<'f_, Fn_, G_, A, B>(
+        fa: Kind<'f_, F_, A>,
+        fn_: Fn_,
+    ) -> Kind<'f_, G_, Kind<'f_, F_, B>>
     where
         G_: Applicative<G_>,
-        F: Fn(A) -> Kind<'kind, G_, B>;
+        Fn_: Fn(A) -> Kind<'f_, G_, B>;
 }
 
-pub trait TraverseExt<'kind, F_: Traverse<F_>> {
-    type Item;
-    fn traverse<Func, G_, B>(self, f: Func) -> Kind<'kind, G_, Kind<'kind, F_, B>>
+pub trait TraverseExt<'f_, F_: Traverse<F_>> {
+    type A;
+
+    /// (Self<Self::A>, λ) -> G<Self<Self::A>>
+    /// where
+    /// Self: F
+    /// G: Applicative
+    /// λ: Fn(Self::A) -> G<B>
+    fn traverse<Fn_, G_, B>(self, fn_: Fn_) -> Kind<'f_, G_, Kind<'f_, F_, B>>
     where
         G_: Applicative<G_>,
-        Func: Fn(Self::Item) -> Kind<'kind, G_, B>;
+        Fn_: Fn(Self::A) -> Kind<'f_, G_, B>;
 }
 
-impl<'kind, K, T> TraverseExt<'kind, K> for Kind<'kind, K, T>
+impl<'f_, F_, A> TraverseExt<'f_, F_> for Kind<'f_, F_, A>
 where
-    K: Traverse<K>,
+    F_: Traverse<F_>,
 {
-    type Item = T;
-    fn traverse<F, G, B>(self, f: F) -> Kind<'kind, G, Kind<'kind, K, B>>
+
+    /// (Self<A>, λ) -> G<Self<A>>
+    /// where
+    /// Self: F
+    /// G: Applicative,
+    /// λ: Fn(A) -> G<B>
+    type A = A;
+    fn traverse<Fn_, G_, B>(self, f: Fn_) -> Kind<'f_, G_, Kind<'f_, F_, B>>
     where
-        G: Applicative<G>,
-        F: Fn(Self::Item) -> Kind<'kind, G, B>,
+        G_: Applicative<G_>,
+        Fn_: Fn(Self::A) -> Kind<'f_, G_, B>,
     {
-        K::traverse(self, f)
+        F_::traverse(self, f)
     }
 }

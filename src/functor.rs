@@ -1,37 +1,37 @@
 use kind::Empty;
-use kind::EmptyType;
 use kind::Kind;
 use kind::HKT;
 
 pub trait Functor<F_: HKT, Z = Empty>: HKT {
-    fn map<'kind, FnAb, A, B>(a: Kind<'kind, F_, A, Z>, f: FnAb) -> Kind<'kind, F_, B, Z>
+    /// (F<(A,)>, Fn(A) -> B) -> F<B,>
+    fn map<'f_, Fn_, A, B>(a: Kind<'f_, F_, A, Z>, f: Fn_) -> Kind<'f_, F_, B, Z>
     where
-        FnAb: Fn(A) -> B + 'kind;
+        Fn_: Fn(A) -> B + 'f_;
 }
 
-pub trait KindFunctorExt<'kind, K, Z = Empty>
+pub trait KindFunctorExt<'f_, F_, Z>
 where
-    K: Functor<K, Z>,
+    F_: Functor<F_, Z>,
 {
-    type Item;
+    type A;
     type Z = Z;
-    fn map<B, F>(self, f: F) -> Kind<'kind, K, B, Self::Z>
+    fn map<B, Fn_>(self, f: Fn_) -> Kind<'f_, F_, B, Self::Z>
     where
-        F: Fn(Self::Item) -> B + 'kind;
+        Fn_: Fn(Self::A) -> B + 'f_;
 }
 
-impl<'kind, K, T, Z> KindFunctorExt<'kind, K, Z> for Kind<'kind, K, T, Z>
+impl<'f_, F_, A, Z> KindFunctorExt<'f_, F_, Z> for Kind<'f_, F_, A, Z>
 where
-    K: Functor<K, Z>,
+    F_: Functor<F_, Z>,
 {
-    type Item = T;
+    type A = A;
     type Z = Z;
 
-    fn map<B, F>(self, f: F) -> Kind<'kind, K, B, Self::Z>
+    fn map<B, Fn_>(self, f: Fn_) -> Kind<'f_, F_, B, Self::Z>
     where
-        F: Fn(Self::Item) -> B + 'kind,
+        Fn_: Fn(Self::A) -> B + 'f_,
     {
-        K::map(self, f)
+        F_::map(self, f)
     }
 }
 
@@ -40,9 +40,9 @@ mod tests {
     use super::*;
     use kind::IntoKind;
 
-    fn convert_to_string<'kind, F>(fa: Kind<'kind, F, i32>) -> Kind<'kind, F, String>
+    fn convert_to_string<'f_, F_>(fa: Kind<'f_, F_, i32>) -> Kind<'f_, F_, String>
     where
-        F: Functor<F>,
+        F_: Functor<F_>,
     {
         fa.map(|i| format!("{} wow monads!!!!", i))
     }
