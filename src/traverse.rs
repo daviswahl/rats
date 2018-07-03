@@ -6,9 +6,17 @@ pub trait Traverse<'f_, F_, Z = Empty>: Functor<'f_, F_, Z>
 where
     F_: Functor<'f_, F_, Z>,
 {
-    /// Given a function which returns a G effect, thread this effect
-    /// through the running of this function on all the values in F,
-    /// returning an F<B> in a G context. -- Cats
+    /// # Signature
+    /// ```text
+    /// (fa: F<'f, A>, fn: Fn) -> G<'g, F<'f, B>>
+    /// where
+    ///     G:  Applicative
+    ///     Fn: A -> G<'g, B>
+    /// ```
+    ///
+    /// > Given a function which returns a G effect, thread this effect
+    /// > through the running of this function on all the values in F,
+    /// > returning an `F<B>` in a `G` context. -- <cite>Cats</cite>
     ///
     /// # Examples
     ///
@@ -33,11 +41,6 @@ where
     /// let r = r.map(|k| k.reify()).reify();
     /// assert_eq!(r, None);
     /// ```
-    ///
-    /// (F<A>, Fn) -> G<F<B>>
-    /// where
-    /// G: Applicative
-    /// Fn: Fn(A) -> G<B>
     fn traverse<'g_, Fn_, G_, A, B, Z2>(fa: Kind<'f_, F_, A, Z>, fn_: Fn_) -> Kind<'g_, G_, Kind<'f_, F_, B, Z>, Z2>
     where
         G_: Applicative<'g_, G_, Z2>,
