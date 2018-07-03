@@ -2,6 +2,8 @@ use data::id::Id;
 use futures::future::Future;
 use std::marker::{PhantomData, Send, Sync};
 use std::any::Any;
+use std::fmt;
+use std::fmt::{Debug, Formatter};
 
 pub trait HKT: Sync + Send + Sized + 'static {
     type Kind: HKT;
@@ -45,9 +47,9 @@ pub trait ReifyRef<F_: HKT, A, B = Empty> {
     fn reify_as_ref(&self) -> &Self::Out;
 }
 
-pub trait IntoKind<'kind, F_: HKT, A: 'kind, B: 'kind = Empty> {
+pub trait IntoKind<'f_, F_: HKT, A: 'f_, B: 'f_ = Empty> {
     type Kind: HKT;
-    fn into_kind(self) -> Kind<'kind, F_, A, B>;
+    fn into_kind(self) -> Kind<'f_, F_, A, B>;
 }
 
 pub trait AsKind<F_: HKT, A, B = Empty> {
@@ -73,5 +75,58 @@ where
 {
     fn reify(self) -> F_::Out {
         F_::reify(self)
+    }
+}
+
+impl<'f_, F_, A, B> Debug for Kind<'f_, F_, A, B>
+    where
+        F_: HKT,
+        A: Debug,
+        B: Debug,
+        Self: ReifyRef<F_, A, B>,
+        <Self as ReifyRef<F_, A, B>>::Out: Debug,
+{
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "Kind<'f_,{:?}>", self.reify_as_ref())
+    }
+}
+
+impl<'f_, F_, A, B> PartialEq for Kind<'f_, F_, A, B>
+    where
+        F_: HKT,
+        A: PartialEq,
+        B: PartialEq,
+        Self: ReifyRef<F_, A, B>,
+        <Self as ReifyRef<F_, A, B>>::Out: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.reify_as_ref() == other.reify_as_ref()
+    }
+}
+
+impl<'f_, F_, A, B> Clone for Kind<'f_, F_, A, B>
+    where
+        F_: HKT,
+        A: Clone,
+        B: Clone,
+{
+    fn clone(&self) -> Self {
+        match self {
+            Kind::Vec(ref v) => Kind::Vec(v.clone()),
+            Kind::Option(ref o) => Kind::Option(o.clone()),
+            Kind::Id(ref id) => Kind::Id(id.clone()),
+            Kind::Future(ref future) => unimplemented!(),
+            Kind::Result(ref res) => Kind::Result(res.clone()),
+            Kind::Any(ref any) => unimplemented!(),
+            Kind::__MARKER(ref data) => Kind::__MARKER(data.clone()),
+        }
+    }
+}
+
+impl<'f_, F_, A, B> IntoKind<'f_, F_, A, B> for Kind<'f_, F_, A, B> where F_: HKT {
+    type Kind = F_;
+
+    fn into_kind(self) -> Kind<'f_, F_, A, B> {
+        self
     }
 }

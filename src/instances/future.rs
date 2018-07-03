@@ -34,7 +34,7 @@ impl<'f_, Z> Applicative<'f_, FutureKind, Z> for FutureKind {
     }
 
     fn point<A>(a: A) -> FutureK<'f_, A, Z> {
-        future::ok(a).into_kind()
+        Box::new(future::ok(a)).into_kind()
     }
 }
 

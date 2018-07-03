@@ -72,18 +72,18 @@ where
     }
 }
 
-pub trait Point<'f_> {
+pub trait Point<'f_, Z> {
     type Out;
     /// Self -> F<Self> where F: Applicative
-    fn point<F_>(self) -> Kind<'f_, F_, Self::Out>
+    fn point<F_>(self) -> Kind<'f_, F_, Self::Out, Z>
     where
-        F_: Applicative<'f_, F_>;
+        F_: Applicative<'f_, F_, Z>;
 }
 
-impl<'f_, A: 'f_> Point<'f_> for A {
+impl<'f_, A: 'f_, Z: 'f_> Point<'f_, Z> for A {
     type Out = A;
     /// A -> F<B>
-    fn point<F_: Applicative<'f_, F_>>(self) -> Kind<'f_, F_, A> {
+    fn point<F_: Applicative<'f_, F_, Z>>(self) -> Kind<'f_, F_, A, Z> {
         F_::point::<A>(self)
     }
 }

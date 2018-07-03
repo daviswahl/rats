@@ -106,10 +106,10 @@ mod tests {
     }
 
     #[test]
-
     fn test_monad() {
+        use monad::MonadExt;
         let a = 5.point::<OptionKind>();
-        let a = OptionKind::flat_map(a, |a| a.point::<OptionKind>().map(|a| a * 2));
+        let a = a.flat_map(|a| a.point::<OptionKind>().map(|a| a * 2));
         assert_eq!(a.reify(), Some(10));
 
         let ffa = 5.point::<OptionKind>().map(|a| a.point::<OptionKind>());

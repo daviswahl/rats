@@ -1,7 +1,6 @@
 use data::id::Id;
 use futures::future::Future;
 use kind::{IntoKind, Kind, ReifyRef, ReifyKind, HKT};
-use std::fmt;
 use std::fmt::{Debug, Formatter};
 
 // pub mod option_t;
@@ -170,32 +169,6 @@ impl<'f_, A: 'f_, B: 'f_> ReifyKind<'f_, FutureKind, A, B> for FutureKind {
             Kind::Future(t) => t,
             _ => unreachable!(),
         }
-    }
-}
-
-impl<'f_, F_, A, B> Debug for Kind<'f_, F_, A, B>
-where
-    F_: HKT,
-    A: Debug,
-    B: Debug,
-    Self: ReifyRef<F_, A, B>,
-    <Self as ReifyRef<F_, A, B>>::Out: Debug,
-{
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "Kind<'f_,{:?}>", self.reify_as_ref())
-    }
-}
-
-impl<'f_, F_, A, B> PartialEq for Kind<'f_, F_, A, B>
-where
-    F_: HKT,
-    A: PartialEq,
-    B: PartialEq,
-    Self: ReifyRef<F_, A, B>,
-    <Self as ReifyRef<F_, A, B>>::Out: PartialEq,
-{
-    fn eq(&self, other: &Self) -> bool {
-        self.reify_as_ref() == other.reify_as_ref()
     }
 }
 

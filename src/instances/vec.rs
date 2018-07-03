@@ -6,7 +6,11 @@ use kind::IntoKind;
 use kind::Kind;
 use kind::Reify;
 use kinds::VecKind;
+use kind::Empty;
 use traverse::Traverse;
+
+
+
 
 impl<'f_> Functor<'f_, VecKind> for VecKind {
     fn map<F, A, B>(a: Kind<'f_, VecKind, A>, f: F) -> Kind<'f_, VecKind, B>
@@ -19,30 +23,30 @@ impl<'f_> Functor<'f_, VecKind> for VecKind {
 
 impl Foldable<VecKind> for VecKind {
     // this is almost certainly wrong.
-    fn fold_right<FnAbb, A, B>(fa: Kind<VecKind, A>, b: B, fn_abb: FnAbb) -> B
+    fn fold_right<Fn_, A, B>(fa: Kind<VecKind, A>, b: B, fn_: Fn_) -> B
     where
-        FnAbb: Fn((A, B)) -> B,
+        Fn_: Fn((A, B)) -> B,
     {
         let mut b = b;
         for a in fa.reify() {
-            b = fn_abb((a, b));
+            b = fn_((a, b));
         }
         b
     }
 }
 
 impl<'f_> Traverse<'f_, VecKind> for VecKind {
-    fn traverse<FnAGb, G_, A, B>(
+    fn traverse<'g_, Fn_, G_, A, B, Z2>(
         fa: Kind<'f_, VecKind, A>,
-        fn_a_gb: FnAGb,
-    ) -> Kind<'f_, G_, Kind<'f_, VecKind, B>>
+        fn_: Fn_,
+    ) -> Kind<'g_, G_, Kind<'f_, VecKind, B>, Z2>
     where
-        G_: Applicative<'f_, G_>,
-        FnAGb: Fn(A) -> Kind<'f_, G_, B>,
+        G_: Applicative<'g_, G_, Z2>,
+        Fn_: Fn(A) -> Kind<'g_, G_, B, Z2>,
     {
         let acc = vec![].into_kind().point::<G_>();
         VecKind::fold_right(fa, acc, |(a, acc)| {
-            G_::map2(fn_a_gb(a), acc, |(a, b)| {
+            G_::map2(fn_(a), acc, |(a, b)| {
                 // need to add a direct push method
                 let mut v = b.reify();
                 v.push(a);
