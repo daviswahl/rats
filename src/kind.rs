@@ -79,12 +79,12 @@ where
 }
 
 impl<'f_, F_, A, B> Debug for Kind<'f_, F_, A, B>
-    where
-        F_: HKT,
-        A: Debug,
-        B: Debug,
-        Self: ReifyRef<F_, A, B>,
-        <Self as ReifyRef<F_, A, B>>::Out: Debug,
+where
+    F_: HKT,
+    A: Debug,
+    B: Debug,
+    Self: ReifyRef<F_, A, B>,
+    <Self as ReifyRef<F_, A, B>>::Out: Debug,
 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(f, "Kind<'f_,{:?}>", self.reify_as_ref())
@@ -92,12 +92,12 @@ impl<'f_, F_, A, B> Debug for Kind<'f_, F_, A, B>
 }
 
 impl<'f_, F_, A, B> PartialEq for Kind<'f_, F_, A, B>
-    where
-        F_: HKT,
-        A: PartialEq,
-        B: PartialEq,
-        Self: ReifyRef<F_, A, B>,
-        <Self as ReifyRef<F_, A, B>>::Out: PartialEq,
+where
+    F_: HKT,
+    A: PartialEq,
+    B: PartialEq,
+    Self: ReifyRef<F_, A, B>,
+    <Self as ReifyRef<F_, A, B>>::Out: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
         self.reify_as_ref() == other.reify_as_ref()
@@ -105,10 +105,10 @@ impl<'f_, F_, A, B> PartialEq for Kind<'f_, F_, A, B>
 }
 
 impl<'f_, F_, A, B> Clone for Kind<'f_, F_, A, B>
-    where
-        F_: HKT,
-        A: Clone,
-        B: Clone,
+where
+    F_: HKT,
+    A: Clone,
+    B: Clone,
 {
     fn clone(&self) -> Self {
         match self {
@@ -123,7 +123,10 @@ impl<'f_, F_, A, B> Clone for Kind<'f_, F_, A, B>
     }
 }
 
-impl<'f_, F_, A, B> IntoKind<'f_, F_, A, B> for Kind<'f_, F_, A, B> where F_: HKT {
+impl<'f_, F_, A, B> IntoKind<'f_, F_, A, B> for Kind<'f_, F_, A, B>
+where
+    F_: HKT,
+{
     type Kind = F_;
 
     fn into_kind(self) -> Kind<'f_, F_, A, B> {

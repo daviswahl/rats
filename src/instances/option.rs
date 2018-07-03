@@ -31,13 +31,15 @@ impl<'f_> Applicative<'f_, OptionKind> for OptionKind {
 }
 
 impl<'f_> Monad<'f_, OptionKind> for OptionKind {
-    fn flat_map<A, B, Fn_>(fa: Kind<'f_, OptionKind, A>, fn_: Fn_) -> OptionK<'f_, B> where
+    fn flat_map<A, B, Fn_>(fa: Kind<'f_, OptionKind, A>, fn_: Fn_) -> OptionK<'f_, B>
+    where
         A: 'f_,
         B: 'f_,
-        Fn_: Fn(A) -> Kind<'f_, OptionKind, B> {
+        Fn_: Fn(A) -> Kind<'f_, OptionKind, B>,
+    {
         match fa.reify() {
             Some(f) => fn_(f),
-            None => None.into_kind()
+            None => None.into_kind(),
         }
     }
 }

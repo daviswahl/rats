@@ -19,10 +19,7 @@ pub mod traverse;
 mod tests;
 mod scratch;
 mod monad;
-
-type Function<Args> = Fn(Args);
-type FunctionOnce<Args> = FnOnce(Args);
-type FunctionMut<Args> = FnMut(Args);
+mod scratch2;
 
 // TODO: Put this somewhere.
 pub fn identity<A>(a: A) -> A {

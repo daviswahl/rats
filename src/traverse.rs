@@ -1,6 +1,6 @@
 use applicative::Applicative;
 use functor::Functor;
-use kind::{Kind,IntoKind, Empty};
+use kind::{Kind, IntoKind, Empty};
 
 pub trait Traverse<'f_, F_, Z = Empty>: Functor<'f_, F_, Z>
 where
@@ -41,13 +41,19 @@ where
     /// let r = r.map(|k| k.reify()).reify();
     /// assert_eq!(r, None);
     /// ```
-    fn traverse<'g_, Fn_, G_, A, B, Z2>(fa: Kind<'f_, F_, A, Z>, fn_: Fn_) -> Kind<'g_, G_, Kind<'f_, F_, B, Z>, Z2>
+    fn traverse<'g_, Fn_, G_, A, B, Z2>(
+        fa: Kind<'f_, F_, A, Z>,
+        fn_: Fn_,
+    ) -> Kind<'g_, G_, Kind<'f_, F_, B, Z>, Z2>
     where
         G_: Applicative<'g_, G_, Z2>,
         Fn_: Fn(A) -> Kind<'g_, G_, B, Z2>;
 }
 
-pub trait TraverseExt<'f_, F_, Z> where F_: Traverse<'f_, F_, Z> {
+pub trait TraverseExt<'f_, F_, Z>
+where
+    F_: Traverse<'f_, F_, Z>,
+{
     type A;
 
     /// (Self<Self::A>, λ) -> G<Self<Self::A>>
@@ -81,14 +87,14 @@ where
 }
 
 mod tests {
-    use kind::{Kind,IntoKind, Reify, ReifyRef};
+    use kind::{Kind, IntoKind, Reify, ReifyRef};
     use kinds::OptionKind;
     use traverse::TraverseExt;
     fn doc_test() {
         fn parse_int<'a>(s: &str) -> Kind<'a, OptionKind, i32> {
-           match s.parse::<i32>() {
-               Ok(e) => Some(e)     ,
-               Err(_) => None
+            match s.parse::<i32>() {
+                Ok(e) => Some(e),
+                Err(_) => None,
             }.into_kind()
         }
     }
