@@ -41,7 +41,7 @@ where
     fn traverse<'g_, Fn_, G_, A, B, Z2>(fa: Kind<'f_, F_, A, Z>, fn_: Fn_) -> Kind<'g_, G_, Kind<'f_, F_, B, Z>, Z2>
     where
         G_: Applicative<'g_, G_, Z2>,
-        Fn_: Fn(A) -> Kind<'g_, G_, B, Z>;
+        Fn_: Fn(A) -> Kind<'g_, G_, B, Z2>;
 }
 
 pub trait TraverseExt<'f_, F_, Z> where F_: Traverse<'f_, F_, Z> {
@@ -55,14 +55,12 @@ pub trait TraverseExt<'f_, F_, Z> where F_: Traverse<'f_, F_, Z> {
     fn traverse<Fn_, G_, B, Z2>(self, fn_: Fn_) -> Kind<'f_, G_, Kind<'f_, F_, B, Z>, Z2>
     where
         G_: Applicative<'f_, G_, Z2>,
-        Fn_: Fn(Self::A) -> Kind<'f_, G_, B, Z>;
+        Fn_: Fn(Self::A) -> Kind<'f_, G_, B, Z2>;
 }
 
-impl<'f_, F_, A, Z> TraverseExt<'f_, F_, Z> for A
+impl<'f_, F_, A, Z> TraverseExt<'f_, F_, Z> for Kind<'f_, F_, A, Z>
 where
     F_: Traverse<'f_, F_, Z>,
-    A: IntoKind<'f_, F_, A, Z, Kind=F_> + 'f_,
-    Z: 'f_
 {
     /// (Self<A>, λ) -> G<Self<A>>
     /// where
@@ -73,7 +71,7 @@ where
     fn traverse<Fn_, G_, B, Z2>(self, f: Fn_) -> Kind<'f_, G_, Kind<'f_, F_, B, Z>, Z2>
     where
         G_: Applicative<'f_, G_, Z2>,
-        Fn_: Fn(Self::A) -> Kind<'f_, G_, B, Z>,
+        Fn_: Fn(Self::A) -> Kind<'f_, G_, B, Z2>,
     {
         F_::traverse(self.into_kind(), f)
     }

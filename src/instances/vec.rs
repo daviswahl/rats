@@ -62,7 +62,7 @@ mod tests {
     use functor::KindFunctorExt;
     use identity;
     use kind::IntoKind;
-    use traverse::TraverseExt;
+    use traverse::{TraverseExt,Traverse};
 
     #[test]
     fn test_vec_map_from_functor_1() {
@@ -114,10 +114,7 @@ mod tests {
 
     #[test]
     fn test_traverse() {
-        let list = vec![Some(1), Some(2), None]
-            .into_kind()
-            .map(|k| k.into_kind())
-            .traverse(identity);
+        let list = vec![Some(1), Some(2), None].into_kind().map(|f| f.into_kind()).traverse(identity);
         assert_eq!(list.map(|i| i.reify()).reify(), None)
     }
 }
