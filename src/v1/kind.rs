@@ -1,9 +1,12 @@
 use data::id::Id;
 use futures::future::Future;
-use std::marker::{PhantomData, Send, Sync};
 use std::any::Any;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
+use std::marker::{PhantomData, Send, Sync};
+
+
+
 
 pub trait HKT: Sync + Send + Sized + 'static {
     type Kind: HKT;
@@ -37,7 +40,13 @@ where
     __MARKER(PhantomData<*const F_>),
 }
 
+
 pub trait ReifyKind<'f_, F_: HKT, A, B = Empty> {
+    type Out;
+    fn reify(fa: Kind<'f_, F_, A, B>) -> Self::Out;
+}
+
+pub trait ReifyKind1<'f_, F_: HKT, A, B = Empty> {
     type Out;
     fn reify(fa: Kind<'f_, F_, A, B>) -> Self::Out;
 }
@@ -115,9 +124,9 @@ where
             Kind::Vec(ref v) => Kind::Vec(v.clone()),
             Kind::Option(ref o) => Kind::Option(o.clone()),
             Kind::Id(ref id) => Kind::Id(id.clone()),
-            Kind::Future(ref future) => unimplemented!(),
+            Kind::Future(_) => unimplemented!(),
             Kind::Result(ref res) => Kind::Result(res.clone()),
-            Kind::Any(ref any) => unimplemented!(),
+            Kind::Any(_) => unimplemented!(),
             Kind::__MARKER(ref data) => Kind::__MARKER(data.clone()),
         }
     }

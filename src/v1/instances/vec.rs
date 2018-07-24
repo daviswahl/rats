@@ -6,11 +6,7 @@ use kind::IntoKind;
 use kind::Kind;
 use kind::Reify;
 use kinds::VecKind;
-use kind::Empty;
 use traverse::Traverse;
-
-
-
 
 impl<'f_> Functor<'f_, VecKind> for VecKind {
     fn map<F, A, B>(a: Kind<'f_, VecKind, A>, f: F) -> Kind<'f_, VecKind, B>
@@ -62,7 +58,7 @@ mod tests {
     use functor::KindFunctorExt;
     use identity;
     use kind::IntoKind;
-    use traverse::{TraverseExt, Traverse};
+    use traverse::TraverseExt;
 
     #[test]
     fn test_vec_map_from_functor_1() {

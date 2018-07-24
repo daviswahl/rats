@@ -1,8 +1,6 @@
 use data::id::Id;
 use futures::future::Future;
-use kind::{IntoKind, Kind, ReifyRef, ReifyKind, HKT};
-use std::fmt::{Debug, Formatter};
-
+use kind::{IntoKind, Kind, ReifyKind, ReifyRef, HKT};
 // pub mod option_t;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -64,19 +62,12 @@ impl<'f_, A: 'f_, B: 'f_> IntoKind<'f_, ResultKind, A, B> for Result<A, B> {
 }
 
 impl<'f_, A: 'f_, B: 'f_, F_: 'f_> IntoKind<'f_, FutureKind, A, B> for F_
-    where
-        F_: Future<Item = A, Error = B>,
+where
+    F_: Future<Item = A, Error = B>,
 {
-    default type Kind = FutureKind;
-    default fn into_kind(self) -> Kind<'f_, FutureKind, A, B> {
-        Kind::Future::<FutureKind, A, B>(Box::new(self))
-    }
-}
-
-impl<'f_, A: 'f_, B: 'f_> IntoKind<'f_, FutureKind, A, B> for Box<Future<Item = A, Error = B>> {
     type Kind = FutureKind;
     fn into_kind(self) -> Kind<'f_, FutureKind, A, B> {
-        Kind::Future::<FutureKind, A, B>(self)
+        Kind::Future::<FutureKind, A, B>(Box::new(self))
     }
 }
 
@@ -174,8 +165,8 @@ impl<'f_, A: 'f_, B: 'f_> ReifyKind<'f_, FutureKind, A, B> for FutureKind {
 
 #[cfg(test)]
 mod tests {
-    use kind::Reify;
     use super::*;
+    use kind::Reify;
     #[test]
     fn tests() {
         let r = vec![1, 2, 3].into_kind();

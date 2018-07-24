@@ -1,6 +1,6 @@
 use applicative::Applicative;
 use functor::Functor;
-use kind::{Kind, IntoKind, Empty};
+use kind::{Empty, IntoKind, Kind};
 
 pub trait Traverse<'f_, F_, Z = Empty>: Functor<'f_, F_, Z>
 where
@@ -22,7 +22,7 @@ where
     ///
     /// ```
     /// # use rats::kind::{IntoKind, Reify, Kind, ReifyRef};
-    /// # use rats::kinds::OptionKind;
+    /// # use rats::v1.kinds::OptionKind;
     /// # use rats::functor::KindFunctorExt;
     /// use rats::traverse::TraverseExt;
     ///
@@ -35,7 +35,7 @@ where
     ///
     /// let r = vec!["1","2","3"].into_kind().traverse(parse_int);
     /// let r = r.map(|k| k.reify()).reify();
-    /// assert_eq!(r, Some(vec![1,2,3]));
+    /// assert_eq!(ome(vec![1,2,3]));
     ///
     /// let r = vec!["1","two", "3"].into_kind().traverse(parse_int);
     /// let r = r.map(|k| k.reify()).reify();
@@ -83,19 +83,5 @@ where
         Fn_: Fn(Self::A) -> Kind<'f_, G_, B, Z2>,
     {
         F_::traverse(self.into_kind(), f)
-    }
-}
-
-mod tests {
-    use kind::{Kind, IntoKind, Reify, ReifyRef};
-    use kinds::OptionKind;
-    use traverse::TraverseExt;
-    fn doc_test() {
-        fn parse_int<'a>(s: &str) -> Kind<'a, OptionKind, i32> {
-            match s.parse::<i32>() {
-                Ok(e) => Some(e),
-                Err(_) => None,
-            }.into_kind()
-        }
     }
 }

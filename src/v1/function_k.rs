@@ -36,7 +36,7 @@ where
     F_: HKT,
 {
     type ZOut = Empty;
-    default fn map_kind<G_: HKT>(self) -> Kind<'f_, G_, A, Empty>
+    fn map_kind<G_: HKT>(self) -> Kind<'f_, G_, A, Empty>
     where
         F_: FunctionK<F_, G_, Z, ZOut = Self::ZOut>,
     {
