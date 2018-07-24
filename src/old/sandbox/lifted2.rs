@@ -1,4 +1,4 @@
-//use v1.data::id::Id;
+//use old.v1.data::id::Id;
 //use futures::future::Future;
 use std::any::Any;
 use std::fmt;
@@ -100,8 +100,8 @@ where F_: HKT, A: Debug, B: Debug
 //            Kind::OptionT(ref k) => unimplemented!(),
 //            Kind::Result(ref res) => Kind::Result(res.clone()),
 //            Kind::Any(_) => unimplemented!(),
-//            Kind::__MARKER(ref v1.data) => Kind::__MARKER(v1.data.clone()),
-//            Kind::__MARKER2(ref v1.data) => Kind::__MARKER2(v1.data.clone()),
+//            Kind::__MARKER(ref old.v1.data) => Kind::__MARKER(old.v1.data.clone()),
+//            Kind::__MARKER2(ref old.v1.data) => Kind::__MARKER2(old.v1.data.clone()),
 //        }
 //    }
 //}

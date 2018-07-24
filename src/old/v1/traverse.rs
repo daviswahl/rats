@@ -22,7 +22,7 @@ where
     ///
     /// ```
     /// # use rats::kind::{IntoKind, Reify, Kind, ReifyRef};
-    /// # use rats::v1.kinds::OptionKind;
+    /// # use rats::old.v1.kinds::OptionKind;
     /// # use rats::functor::KindFunctorExt;
     /// use rats::traverse::TraverseExt;
     ///

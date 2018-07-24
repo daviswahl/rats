@@ -79,7 +79,7 @@ where
 //    }
 //}
 //
-//use v1.kinds::ResultKind;
+//use old.v1.kinds::ResultKind;
 //impl<'f_, A, Z> Unlift for Kind<'f_, ResultKind, A, Z>
 //where
 //    Z: Unlift,

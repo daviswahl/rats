@@ -411,8 +411,8 @@ mod tests {
 
         // operation is constructed on the stack, so, typeof e is:
         // `functor<'_, VecKind, String,
-        //         functor<'_, VecKind, i32, [closure@src/sandbox/lazy8.rs:377:18: 377:27],
-        //                functor<'_, VecKind, i32, [closure@src/sandbox/lazy8.rs:376:18: 376:27],
+        //         functor<'_, VecKind, i32, [closure@src/old.sandbox/lazy8.rs:377:18: 377:27],
+        //                functor<'_, VecKind, i32, [closure@src/old.sandbox/lazy8.rs:376:18: 376:27],
         //                       Head<'_, VecKind, i32>>>>`
         assert_eq!(
             e.run(vec![1, 2, 3]),

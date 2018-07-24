@@ -22,21 +22,22 @@ extern crate futures;
 extern crate test;
 #[allow(non_camel_case_types)]
 //pub mod applicative;
-//pub mod v1.data;
+//pub mod old.v1.data;
 //pub mod foldable;
 //pub mod function_k;
 //pub mod functor;
-//pub mod v1.instances;
+//pub mod old.v1.instances;
 //pub mod kind;
-//pub mod v1.kinds;
+//pub mod old.v1.kinds;
 //pub mod traverse;
 //
-//mod tests;
+//mod old.tests;
 ////mod scratch;
 //mod monad;
-mod v2;
-//use sandbox::lifted4;
+// mod old.v2;
+//use old.sandbox::lifted4;
 
+mod lifted;
 // TODO: Put this somewhere.
 pub fn identity<A>(a: A) -> A {
     a
