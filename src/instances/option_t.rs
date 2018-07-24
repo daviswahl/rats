@@ -37,6 +37,7 @@ impl<'a, G, A, Z> Unlift<OptionTKind> for Lifted<'a, OptionTKind, A, Z, G> {
         }
     }
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -64,5 +65,4 @@ mod tests {
             Some(vec![2, 4, 6])
         )
     }
-
 }

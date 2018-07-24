@@ -6,6 +6,7 @@ use lifted::*;
 pub struct FutureKind;
 
 impl HKT for FutureKind {}
+impl<'a> HKT for &'a FutureKind {}
 
 impl<'a, A, B, F> Lift<'a, FutureKind, A, B> for F
 where
@@ -37,6 +38,7 @@ impl<'a, Z> Functor<'a, FutureKind, Z> for FutureKind {
         fa.unlift().map(func).lift()
     }
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -49,6 +51,7 @@ mod tests {
         let f = FutureKind::map(f, |i| i * 2).unlift();
         assert_eq!(block_on(f).unwrap(), 2)
     }
+
     use super::*;
     use test::*;
 
