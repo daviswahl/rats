@@ -21,14 +21,14 @@ where
 {
     Option(Option<A>),
     Result(Result<A, B>),
-    OptionT(OptionT<'a, G, A, B>),
+    OptionT(Box<OptionT<'a, G, A, B>>),
     Kleisli(Kleisli<'a, F, A, B, G>),
     Iterator(Box<Iterator<Item = A> + 'a>),
     __marker(F),
 }
 
-pub trait Lift<'a, F, A, B = Nothing, G = Nothing> {
-    fn lift(self) -> Lifted<'a, F, A, B, G>;
+pub trait Lift<'a, F, A, Z = Nothing, G = Nothing> {
+    fn lift(self) -> Lifted<'a, F, A, Z, G>;
 }
 
 pub trait Unlift<F> {
