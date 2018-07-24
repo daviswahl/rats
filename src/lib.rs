@@ -34,6 +34,8 @@ pub mod instances;
 // mod old.v2;
 //use old.sandbox::lifted4;
 pub mod lifted;
+pub mod monoid;
+pub mod semigroup;
 use instances::*;
 // TODO: Put this somewhere.
 pub fn identity<A>(a: A) -> A {
