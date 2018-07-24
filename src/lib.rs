@@ -20,6 +20,9 @@
 extern crate core;
 extern crate futures;
 extern crate test;
+pub mod data;
+pub mod functor;
+pub mod instances;
 #[allow(non_camel_case_types)]
 //pub mod applicative;
 //pub mod old.v1.data;
@@ -36,8 +39,8 @@ extern crate test;
 //mod monad;
 // mod old.v2;
 //use old.sandbox::lifted4;
-
-mod lifted;
+pub mod lifted;
+use instances::*;
 // TODO: Put this somewhere.
 pub fn identity<A>(a: A) -> A {
     a
