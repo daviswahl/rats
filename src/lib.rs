@@ -7,13 +7,7 @@
 //#![feature(gen_future)]
 //#![feature(proc_macro)]
 //#![feature(never_type)]
-#![feature(
-    async_await,
-    futures_api,
-    await_macro,
-    pin,
-    arbitrary_self_types
-)]
+#![feature(async_await, futures_api, await_macro, pin, arbitrary_self_types)]
 #![feature(fn_traits, unboxed_closures)]
 #![feature(generator_trait, generators)]
 //extern crate futures;
