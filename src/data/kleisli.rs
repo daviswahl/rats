@@ -1,13 +1,13 @@
 use lifted::Lifted;
 use std::marker::PhantomData;
 
-pub struct Kleisli<F, A, B, Func> {
+pub struct Kleisli<'a, F: 'a, A: 'a, B: 'a, Func> {
     run: Func,
-    __marker: PhantomData<(F, A, B)>,
+    __marker: PhantomData<&'a (F, A, B)>,
 }
 
-impl<F, A, B, Func> Kleisli<F, A, B, Func>
+impl<'a, F, A, B, Func> Kleisli<'a, F, A, B, Func>
 where
-    Func: Fn(A) -> Lifted<F, B>,
+    Func: Fn(A) -> Lifted<'a, F, B>,
 {
 }

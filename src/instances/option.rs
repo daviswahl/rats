@@ -7,10 +7,7 @@ pub struct OptionKind;
 
 impl HKT for OptionKind {}
 
-impl Functor<OptionKind> for OptionKind {
-    type B = Nothing;
-    type G = Nothing;
-
+impl<'a> Functor<'a, OptionKind> for OptionKind {
     fn map<Func, A, B>(fa: Lifted<OptionKind, A>, func: Func) -> Lifted<OptionKind, B>
     where
         Func: Fn(A) -> B,
@@ -22,7 +19,7 @@ impl Functor<OptionKind> for OptionKind {
     }
 }
 
-impl<A, B, G> Unlift<OptionKind> for Lifted<OptionKind, A, B, G> {
+impl<'a, A, B, G> Unlift<OptionKind> for Lifted<'a, OptionKind, A, B, G> {
     type Out = Option<A>;
 
     fn unlift(self) -> <Self as Unlift<OptionKind>>::Out {
@@ -33,8 +30,8 @@ impl<A, B, G> Unlift<OptionKind> for Lifted<OptionKind, A, B, G> {
     }
 }
 
-impl<A> Lift<OptionKind, A> for Option<A> {
-    fn lift(self) -> Lifted<OptionKind, A> {
+impl<'a, A> Lift<'a, OptionKind, A> for Option<A> {
+    fn lift(self) -> Lifted<'a, OptionKind, A> {
         Lifted::Option(self)
     }
 }

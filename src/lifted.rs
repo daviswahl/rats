@@ -4,18 +4,31 @@ use std::marker::PhantomData;
 pub trait HKT {}
 
 pub struct Nothing {}
+impl Iterator for Nothing {
+    type Item = Nothing;
 
-pub enum Lifted<F, A, B = Nothing, G = Nothing> {
+    fn next(&mut self) -> Option<<Self as Iterator>::Item> {
+        unimplemented!()
+    }
+}
+
+pub enum Lifted<'a, F, A, B = Nothing, G = Nothing>
+where
+    F: 'a,
+    A: 'a,
+    B: 'a,
+    G: 'a,
+{
     Option(Option<A>),
     Result(Result<A, B>),
-    OptionT(OptionT<G, A, B>),
-    Kleisli(Kleisli<F, A, B, G>),
-    Iterator(G),
+    OptionT(OptionT<'a, G, A, B>),
+    Kleisli(Kleisli<'a, F, A, B, G>),
+    Iterator(Box<Iterator<Item = A> + 'a>),
     __marker(F),
 }
 
-pub trait Lift<F, A, B = Nothing, G = Nothing> {
-    fn lift(self) -> Lifted<F, A, B, G>;
+pub trait Lift<'a, F, A, B = Nothing, G = Nothing> {
+    fn lift(self) -> Lifted<'a, F, A, B, G>;
 }
 
 pub trait Unlift<F> {
