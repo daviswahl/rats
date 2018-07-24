@@ -1,6 +1,9 @@
+use data::future_a::FutureA;
 use data::kleisli::Kleisli;
 use data::option_t::OptionT;
+use std::future::Future;
 use std::marker::PhantomData;
+
 pub trait HKT {}
 
 pub struct Nothing {}
@@ -24,6 +27,7 @@ where
     OptionT(Box<OptionT<'a, G, A, B>>),
     Kleisli(Kleisli<'a, F, A, B, G>),
     Iterator(Box<Iterator<Item = A> + 'a>),
+    Future(FutureA<A>),
     __marker(F),
 }
 
