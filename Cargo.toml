@@ -6,4 +6,4 @@ description = "An experiemental functional programming library for Rust. WIP."
 license = "MIT"
 
 [dependencies]
-futures = { git = "https://github.com/rust-lang-nursery/futures-rs.git" , branch = "0.3" }
+futures-preview = { git = "https://github.com/rust-lang-nursery/futures-rs.git" , branch = "0.2" }
