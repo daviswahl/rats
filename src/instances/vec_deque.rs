@@ -41,6 +41,18 @@ impl<'a> Functor<'a, VecDequeKind> for VecDequeKind {
     }
 }
 
+fn fold_right<A, B, Func>(fa: VecDeque<A>, acc: B, func: &Func) -> B
+where
+    Func: Fn(B, A) -> B,
+{
+    let mut acc = acc;
+    let mut tail = fa;
+    if let Some(head) = tail.pop_front() {
+        acc = func(fold_right(tail, acc, func), head)
+    }
+    acc
+}
+
 impl<'a> Foldable<VecDequeKind> for VecDequeKind {
     fn fold_left<A, B, Func>(fa: Lifted<VecDequeKind, A>, acc: B, func: Func) -> B
     where
@@ -58,12 +70,9 @@ impl<'a> Foldable<VecDequeKind> for VecDequeKind {
     where
         Func: Fn(B, A) -> B,
     {
-        let mut acc = acc;
-        let mut tail = fa.unlift();
-        if let Some(head) = tail.pop_front() {
-            acc = func(Self::fold_right(tail.lift(), acc, func), head)
-        }
-        acc
+        // we do the actual work on VecDeque directly so we dont have to re-lift in order
+        // to recurse
+        fold_right(fa.unlift(), acc, func)
     }
 }
 
@@ -87,6 +96,7 @@ impl<'a> Traverse<'a, VecDequeKind> for VecDequeKind {
         })
     }
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;
