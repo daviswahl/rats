@@ -15,7 +15,7 @@ where
         func: Func,
     ) -> Lifted<'a, OptionTKind, B, Z, G>
     where
-        Func: Fn(A) -> B + 'a,
+        Func: Fn(&A) -> B + 'a,
     {
         fa.unlift().map(func).lift()
     }

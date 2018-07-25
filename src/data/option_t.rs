@@ -15,7 +15,7 @@ where
 impl<'a, F, A, Z> OptionT<'a, F, A, Z> {
     pub fn map<Func, B>(self, func: Func) -> OptionT<'a, F, B, Z>
     where
-        Func: Fn(A) -> B + 'a,
+        Func: Fn(&A) -> B + 'a,
         F: Functor<'a, F, Z>,
     {
         OptionT {

@@ -1,5 +1,4 @@
 use functor::Functor;
-use functor::Functor2;
 use lifted::Lift;
 use lifted::Unlift;
 use lifted::{Lifted, Nothing, HKT};
@@ -13,21 +12,12 @@ impl<'a> HKT for &'a mut OptionKind {}
 impl<'a> Functor<'a, OptionKind> for OptionKind {
     fn map<Func, A, B>(fa: Lifted<OptionKind, A>, func: Func) -> Lifted<OptionKind, B>
     where
-        Func: Fn(A) -> B,
+        Func: Fn(&A) -> B,
     {
         match fa.unlift() {
-            Some(a) => Some(func(a)),
+            Some(a) => Some(func(&a)),
             None => None,
         }.lift()
-    }
-}
-
-impl<'a, A> Functor2<'a, &'a mut OptionKind, A> for Lifted<'a, &'a mut OptionKind, A> {
-    fn fmap<Func: 'a, B>(self, func: Func) -> Lifted<'a, &'a mut OptionKind, B>
-    where
-        Func: Fn(A) -> B,
-    {
-        unimplemented!()
     }
 }
 
@@ -72,9 +62,9 @@ mod tests {
     #[test]
     fn test_lift_unlift() {
         let mut foo = "foo".to_owned();
-        let o = Some(&mut foo).lift();
+        let o = Some(&foo).lift();
 
-        let r = o.fmap(|i| i.split_at(10));
+        let r = OptionKind::map(o, |i| i.split_at(1));
         r.unlift();
     }
 

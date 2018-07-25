@@ -33,9 +33,9 @@ impl<'a, Z> Functor<'a, FutureKind, Z> for FutureKind {
         func: Func,
     ) -> Lifted<'a, FutureKind, B, Z>
     where
-        Func: Fn(A) -> B + 'a,
+        Func: FnOnce(&A) -> B + 'a,
     {
-        fa.unlift().map(func).lift()
+        fa.unlift().map(|f| func(&f)).lift()
     }
 }
 
@@ -59,8 +59,10 @@ mod tests {
     fn bench_functor_map(b: &mut Bencher) {
         b.iter(|| {
             for i in 0..10000 {
-                let f = future::ok::<String, &str>("foo".to_owned()).lift();
-                black_box(block_on(FutureKind::map(f, |s| s + "foo").unlift()).unwrap());
+                let f = future::ok::<&str, &str>("foo").lift();
+                black_box(
+                    block_on(FutureKind::map(f, |s| "foo".to_string() + "foo").unlift()).unwrap(),
+                );
             }
         })
     }
