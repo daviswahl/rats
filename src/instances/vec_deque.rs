@@ -61,7 +61,6 @@ impl<'a> Foldable<VecDequeKind> for VecDequeKind {
         if let Some(head) = tail.pop_front() {
             acc = func(Self::fold_right(tail.lift(), acc, func), head)
         }
-
         acc
     }
 }

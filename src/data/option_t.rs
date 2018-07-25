@@ -1,5 +1,4 @@
 use functor::Functor;
-use instances::option::OptionKind;
 use lifted::Unlift;
 use lifted::{Lifted, Nothing};
 

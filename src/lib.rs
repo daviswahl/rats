@@ -10,6 +10,7 @@ pub mod instances;
 pub mod lifted;
 pub mod monoid;
 pub mod semigroup;
+// pub mod trampoline;
 use instances::*;
 // TODO: Put this somewhere.
 pub fn identity<A>(a: A) -> A {
