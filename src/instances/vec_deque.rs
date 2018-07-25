@@ -1,3 +1,4 @@
+use foldable::Foldable;
 use functor::Functor;
 use lifted::*;
 use std::collections::VecDeque;
@@ -38,6 +39,33 @@ impl<'a> Functor<'a, VecDequeKind> for VecDequeKind {
     }
 }
 
+impl<'a> Foldable<VecDequeKind> for VecDequeKind {
+    fn fold_left<A, B, Func>(fa: Lifted<VecDequeKind, A>, acc: B, func: Func) -> B
+    where
+        Func: Fn(B, A) -> B,
+    {
+        let mut tail = fa.unlift();
+        let mut acc = acc;
+        while let Some(head) = tail.pop_front() {
+            acc = func(acc, head)
+        }
+        acc
+    }
+
+    fn fold_right<A, B, Func>(fa: Lifted<VecDequeKind, A>, acc: B, func: &Func) -> B
+    where
+        Func: Fn(B, A) -> B,
+    {
+        let mut acc = acc;
+        let mut tail = fa.unlift();
+        if let Some(head) = tail.pop_front() {
+            acc = func(Self::fold_right(tail.lift(), acc, func), head)
+        }
+
+        acc
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -48,5 +76,51 @@ mod tests {
         v.push_front("bar");
 
         v.lift().unlift();
+    }
+
+    #[test]
+    fn fold_left() {
+        let mut v = VecDeque::new();
+        v.push_back(1);
+        v.push_back(2);
+        v.push_back(3);
+
+        let result = VecDequeKind::fold_left(v.lift(), 0, |acc, i| acc - i);
+        assert_eq!(result, -6);
+    }
+
+    #[test]
+    fn fold_right() {
+        let mut v = VecDeque::new();
+        v.push_back(1);
+        v.push_back(2);
+        v.push_back(3);
+
+        let result = VecDequeKind::fold_right(v.lift(), 0, &|acc, i| acc - i);
+        assert_eq!(result, -6);
+    }
+
+    #[test]
+    fn fold_m() {
+        use monoid;
+        let mut v = VecDeque::new();
+        v.push_back(1);
+        v.push_back(2);
+        v.push_back(3);
+
+        let result = VecDequeKind::fold_m(v.lift());
+        assert_eq!(result, 6)
+    }
+
+    //#[test]
+    fn blows_stack() {
+        let mut vc = VecDeque::new();
+        for i in 0..10000 {
+            vc.push_back(i)
+        }
+
+        use std::panic;
+        let result =
+            panic::catch_unwind(|| VecDequeKind::fold_right(vc.lift(), 0, &|acc, i| acc + i));
     }
 }

@@ -4,6 +4,7 @@ extern crate core;
 extern crate futures;
 extern crate test;
 pub mod data;
+pub mod foldable;
 pub mod functor;
 pub mod instances;
 pub mod lifted;
