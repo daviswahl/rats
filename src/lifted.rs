@@ -1,6 +1,7 @@
 use data::kleisli::Kleisli;
 use data::option_t::OptionT;
 use futures::Future;
+use std::collections::VecDeque;
 use std::marker::PhantomData;
 
 pub trait HKT {}
@@ -29,6 +30,8 @@ pub enum Lifted<
     Option(Option<A>),
     OptionRef(Option<&'a A>),
     OptionMut(Option<&'a mut A>),
+
+    VecDeque(VecDeque<A>),
 
     Result(Result<A, B>),
     OptionT(Box<OptionT<'a, G, A, B>>),
@@ -69,6 +72,6 @@ mod tests {
     fn test_lifted_size() {
         let s = Some("foo".to_owned()).lift();
         let s2 = Some("foo".to_owned());
-        assert_eq!(mem::size_of_val(&s), mem::size_of_val(&s2) + 8)
+        assert_eq!(mem::size_of_val(&s), mem::size_of_val(&s2) + 16)
     }
 }
