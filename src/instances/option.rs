@@ -10,12 +10,12 @@ impl<'a> HKT for &'a OptionKind {}
 impl<'a> HKT for &'a mut OptionKind {}
 
 impl<'a> Functor<'a, OptionKind> for OptionKind {
-    fn map<Func, A, B>(fa: Lifted<OptionKind, A>, func: Func) -> Lifted<OptionKind, B>
+    fn map<Func, A, B>(fa: Lifted<'a, OptionKind, A>, func: Func) -> Lifted<'a, OptionKind, B>
     where
-        Func: Fn(&A) -> B,
+        Func: Fn(A) -> B,
     {
         match fa.unlift() {
-            Some(a) => Some(func(&a)),
+            Some(a) => Some(func(a)),
             None => None,
         }.lift()
     }

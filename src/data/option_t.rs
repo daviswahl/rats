@@ -2,20 +2,20 @@ use functor::Functor;
 use lifted::Unlift;
 use lifted::{Lifted, Nothing};
 
-pub struct OptionT<'a, F, A, Z = Nothing>
+pub struct OptionT<'f, F, A, Z = Nothing>
 where
-    F: 'a,
-    A: 'a,
-    Z: 'a,
+    F: 'f,
+    A: 'f,
+    Z: 'f,
 {
-    pub value: Option<Lifted<'a, F, A, Z>>,
+    pub value: Option<Lifted<'f, F, A, Z>>,
 }
 
-impl<'a, F, A, Z> OptionT<'a, F, A, Z> {
-    pub fn map<Func, B>(self, func: Func) -> OptionT<'a, F, B, Z>
+impl<'f, F, A, Z> OptionT<'f, F, A, Z> {
+    pub fn map<Func, B>(self, func: Func) -> OptionT<'f, F, B, Z>
     where
-        Func: Fn(&A) -> B + 'a,
-        F: Functor<'a, F, Z>,
+        Func: Fn(A) -> B + 'f,
+        F: Functor<'f, F, Z>,
     {
         OptionT {
             value: self.value.map(|inner| F::map(inner, func)),

@@ -1,7 +1,7 @@
 use lifted::{Lifted, Nothing, HKT};
 
-pub trait Functor<'a, F: HKT + 'a, Z = Nothing, G = Nothing>: HKT {
-    fn map<Func: 'a, A, B>(fa: Lifted<'a, F, A, Z, G>, func: Func) -> Lifted<'a, F, B, Z, G>
+pub trait Functor<'f, F: HKT + 'f, Z = Nothing, G = Nothing>: HKT {
+    fn map<Func, A, B>(fa: Lifted<'f, F, A, Z, G>, func: Func) -> Lifted<'f, F, B, Z, G>
     where
-        Func: Fn(&A) -> B;
+        Func: Fn(A) -> B + 'f;
 }

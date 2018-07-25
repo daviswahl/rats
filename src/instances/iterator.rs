@@ -28,9 +28,9 @@ impl<'a, A: 'a> Unlift<IteratorKind> for Lifted<'a, IteratorKind, A> {
 impl<'a> Functor<'a, IteratorKind> for IteratorKind {
     fn map<Func, A, B>(fa: Lifted<'a, IteratorKind, A>, func: Func) -> Lifted<'a, IteratorKind, B>
     where
-        Func: Fn(&A) -> B + 'a,
+        Func: Fn(A) -> B + 'a,
     {
-        fa.unlift().map(move |a| func(&a)).lift()
+        fa.unlift().map(move |a| func(a)).lift()
     }
 }
 

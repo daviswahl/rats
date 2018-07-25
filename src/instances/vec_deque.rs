@@ -1,9 +1,11 @@
+use applicative::Applicative;
 use foldable::Foldable;
 use functor::Functor;
 use lifted::*;
 use std::collections::VecDeque;
+use traverse::Traverse;
 
-struct VecDequeKind;
+pub struct VecDequeKind;
 impl HKT for VecDequeKind {}
 
 impl<'a, A> Lift<'a, VecDequeKind, A> for VecDeque<A> {
@@ -29,11 +31,11 @@ impl<'a> Functor<'a, VecDequeKind> for VecDequeKind {
         func: Func,
     ) -> Lifted<'a, VecDequeKind, B, Nothing, Nothing>
     where
-        Func: Fn(&A) -> B,
+        Func: Fn(A) -> B,
     {
         fa.unlift()
             .into_iter()
-            .map(|f| func(&f))
+            .map(|f| func(f))
             .collect::<VecDeque<B>>()
             .lift()
     }
@@ -65,6 +67,26 @@ impl<'a> Foldable<VecDequeKind> for VecDequeKind {
     }
 }
 
+impl<'a> Traverse<'a, VecDequeKind> for VecDequeKind {
+    fn traverse<'g, Func, A, B, Z2, G2, H>(
+        fa: Lifted<VecDequeKind, A>,
+        func: Func,
+    ) -> Lifted<'g, G2, Lifted<'a, VecDequeKind, B>, Z2, H>
+    where
+        G2: Applicative<'g, G2, Z2, H>,
+        Func: Fn(A) -> Lifted<'g, G2, B, Z2, H>,
+    {
+        let acc = G2::point(VecDeque::new().lift());
+        VecDequeKind::fold_right(fa, acc, &|acc, a| {
+            G2::map2(func(a), acc, |(a, b)| {
+                // need to add a direct push method
+                let mut v = b.unlift();
+                v.push_back(a);
+                v.lift()
+            })
+        })
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
