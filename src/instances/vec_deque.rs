@@ -66,6 +66,7 @@ impl<'a> Foldable<VecDequeKind> for VecDequeKind {
         acc
     }
 
+    /// Will blow the stack! TODO: Try Trampolining
     fn fold_right<A, B, Func>(fa: Lifted<VecDequeKind, A>, acc: B, func: &Func) -> B
     where
         Func: Fn(B, A) -> B,
