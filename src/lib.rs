@@ -3,6 +3,7 @@
 #![feature(unboxed_closures)]
 #![feature(tool_attributes)]
 #![feature(fnbox)]
+#![feature(box_syntax)]
 extern crate core;
 extern crate futures;
 extern crate test;

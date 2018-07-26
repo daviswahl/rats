@@ -65,9 +65,9 @@ impl<'a> Applicative<'a, OptionKind> for OptionKind {
 ///
 
 impl<'a> Monad<'a, OptionKind> for OptionKind {
-    fn flat_map<A, B, Func>(fa: Lifted<'a, OptionKind, A>, func: Func) -> Lifted<'a, OptionKind, B>
+    fn flat_map<A, B, Func>(fa: Lifted<'a, OptionKind, A>, func: &Func) -> Lifted<'a, OptionKind, B>
     where
-        Func: FnOnce(A) -> Lifted<'a, OptionKind, B>,
+        Func: Fn(A) -> Lifted<'a, OptionKind, B>,
     {
         match fa.unlift() {
             Some(t) => func(t),

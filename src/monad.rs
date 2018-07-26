@@ -9,9 +9,9 @@ where
     /// (F<A>, Fn) -> F<B>
     /// where
     /// Fn: Fn(A) -> F<B>
-    fn flat_map<A, B, Func>(fa: Lifted<'a, F, A, Z, G>, func: Func) -> Lifted<'a, F, B, Z, G>
+    fn flat_map<A, B, Func>(fa: Lifted<'a, F, A, Z, G>, func: &Func) -> Lifted<'a, F, B, Z, G>
     where
-        Func: FnOnce(A) -> Lifted<'a, F, B, Z, G>;
+        Func: Fn(A) -> Lifted<'a, F, B, Z, G>;
 
     /// (F<A>, Fn) -> F<B>
     /// where
@@ -22,11 +22,11 @@ where
         B: 'a,
         Func: Fn(A) -> B,
     {
-        Self::flat_map(fa, |a| F::point(func(a)))
+        Self::flat_map(fa, &|a| F::point(func(a)))
     }
 
     /// (F<F<A>> -> F<A>
     fn flatten<A>(fa: Lifted<'a, F, Lifted<'a, F, A, Z, G>, Z, G>) -> Lifted<'a, F, A, Z, G> {
-        Self::flat_map(fa, identity)
+        Self::flat_map(fa, &identity)
     }
 }
