@@ -1,4 +1,4 @@
-use data::kleisli::Kleisli;
+use data::kleisli::KleisliT;
 use data::option_t::OptionT;
 use futures::Future;
 use std::collections::VecDeque;
@@ -35,7 +35,7 @@ pub enum Lifted<
 
     Result(Result<A, B>),
     OptionT(Box<OptionT<'a, G, A, B>>),
-    Kleisli(Kleisli<'a, F, A, B>),
+    Kleisli(Box<KleisliT<'a, F, A, B>>),
     Iterator(Box<Iterator<Item = A> + 'a>),
 
     Future(Box<Future<Item = A, Error = B> + 'a>),
