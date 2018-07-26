@@ -11,9 +11,7 @@ where
     /// Fn: Fn(A) -> F<B>
     fn flat_map<A, B, Func>(fa: Lifted<'a, F, A, Z, G>, func: Func) -> Lifted<'a, F, B, Z, G>
     where
-        A: 'a,
-        B: 'a,
-        Func: Fn(A) -> Lifted<'a, F, B, Z, G>;
+        Func: FnOnce(A) -> Lifted<'a, F, B, Z, G>;
 
     /// (F<A>, Fn) -> F<B>
     /// where

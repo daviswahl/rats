@@ -4,7 +4,7 @@ use lifted::{Lifted, Nothing};
 
 pub struct OptionT<'f, F, A, Z = Nothing>
 where
-    F: 'f,
+    F: 'static,
     A: 'f,
     Z: 'f,
 {

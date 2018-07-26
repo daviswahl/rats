@@ -17,7 +17,7 @@ impl Iterator for Nothing {
 
 pub enum Lifted<
     'a,
-    F,           // The HKT of this Lifted
+    F: 'static,  // The HKT of this Lifted
     A,           // The type of the first parameter of F
     B = Nothing, // The type of a second optional parameter to F
     G = Nothing, // The type of an optional nested HKT, G
@@ -25,7 +25,7 @@ pub enum Lifted<
     F: 'a,
     A: 'a,
     B: 'a,
-    G: 'a,
+    G: 'static,
 {
     Option(Option<A>),
     OptionRef(Option<&'a A>),
@@ -35,7 +35,7 @@ pub enum Lifted<
 
     Result(Result<A, B>),
     OptionT(Box<OptionT<'a, G, A, B>>),
-    Kleisli(Kleisli<'a, F, A, B, G>),
+    Kleisli(Kleisli<'a, F, A, B>),
     Iterator(Box<Iterator<Item = A> + 'a>),
 
     Future(Box<Future<Item = A, Error = B> + 'a>),
