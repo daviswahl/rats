@@ -52,10 +52,8 @@ mod tests {
     fn bench_functor_map(b: &mut Bencher) {
         b.iter(|| {
             for _ in 0..10000 {
-                let f = future::ok::<&str, &str>("foo").lift();
-                black_box(
-                    block_on(FutureKind::map(f, |s| "foo".to_string() + s).unlift()).unwrap(),
-                );
+                let f = future::ok::<String, &str>("foo".to_owned()).lift();
+                black_box(block_on(FutureKind::map(f, |s| s + "foo").unlift()).unwrap());
             }
         })
     }
