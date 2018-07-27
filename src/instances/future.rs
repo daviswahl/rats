@@ -1,23 +1,23 @@
 use functor::Functor;
-use futures::future::{Future, FutureObj};
+use futures::future::{Future, LocalFutureObj};
 use futures::FutureExt;
 use lifted::*;
+use std::boxed::PinBox;
 
 pub struct FutureKind;
 
 impl HKT for FutureKind {}
 impl<'a, A, B, G, F> Lift<'a, FutureKind, A, B, G> for F
 where
-    F: Future<Output = A>,
-    FutureObj<'a, A>: From<Box<F>>,
+    F: Future<Output = A> + 'a,
 {
     fn lift(self) -> Lifted<'a, FutureKind, A, B, G> {
-        Lifted::Future(Box::new(self).into())
+        Lifted::Future(LocalFutureObj::new(Box::new(self)))
     }
 }
 
 impl<'a, A, B, G> Unlift<FutureKind> for Lifted<'a, FutureKind, A, B, G> {
-    type Out = FutureObj<'a, A>;
+    type Out = LocalFutureObj<'a, A>;
     fn unlift(self) -> <Self as Unlift<FutureKind>>::Out {
         match self {
             Lifted::Future(f) => f,
@@ -34,7 +34,7 @@ impl<'a, Z, G> Functor<'a, FutureKind, Z, G> for FutureKind {
     where
         Func: FnOnce(A) -> B + 'a,
     {
-        fa.unlift().map(func).lift()
+        Lifted::Future(LocalFutureObj::new(Box::new(fa.unlift().map(func))))
     }
 }
 
@@ -47,19 +47,20 @@ mod tests {
 
     #[test]
     fn test_lift() {
-        let f = future::lazy(|_| 1).lift();
+        // TODO: Fix type annotation
+        let f: Lifted<FutureKind, i32, Nothing, Nothing> = future::lazy(|_| 1).lift();
         let f = FutureKind::map(f, |i| i * 2).unlift();
-        assert_eq!(block_on(f).unwrap(), 2)
+        assert_eq!(block_on(f), 2)
     }
 
     #[bench]
     fn bench_functor_map(b: &mut Bencher) {
         b.iter(|| {
             for _ in 0..10000 {
-                let f = future::lazy(|_| ()).lift();
-                black_box(
-                    block_on(FutureKind::map(f, |s| "foo".to_string() + s).unlift()).unwrap(),
-                );
+                let f: Lifted<FutureKind, &str, Nothing, Nothing> = future::lazy(|_| "foo").lift();
+                black_box(block_on(
+                    FutureKind::map(f, |s| "foo".to_string() + s).unlift(),
+                ));
             }
         })
     }
@@ -68,8 +69,8 @@ mod tests {
     fn bench_native_map(b: &mut Bencher) {
         b.iter(|| {
             for _ in 0..10000 {
-                let f = future::lazy(|_| "foo").lift();
-                black_box(block_on(f.map(|i| i + "foo")).unwrap());
+                let f = future::lazy(|_| "foo");
+                black_box(block_on(f.map(|i| "foo".to_string() + i)));
             }
         })
     }

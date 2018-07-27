@@ -1,6 +1,6 @@
 use data::kleisli::Kleisli;
 use data::option_t::OptionT;
-use futures::future::FutureObj;
+use futures::future::LocalFutureObj;
 use std::collections::VecDeque;
 use std::ops::Deref;
 use std::ops::DerefMut;
@@ -24,9 +24,9 @@ pub enum Lifted<
     G = Nothing, // The type of an optional nested HKT, G
 > where
     F: 'static,
+    G: 'static,
     A: 'a,
     B: 'a,
-    G: 'static,
 {
     Option(Option<A>),
     VecDeque(VecDeque<A>),
@@ -35,7 +35,7 @@ pub enum Lifted<
     OptionT(Box<OptionT<'a, G, A, B>>),
     Kleisli(Box<dyn Kleisli<'a, F, A, B>>),
     Iterator(Box<dyn Iterator<Item = A> + 'a>),
-    Future(FutureObj<'a, A>),
+    Future(LocalFutureObj<'a, A>),
 
     __Marker(*const F),
 }
