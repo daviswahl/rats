@@ -1,22 +1,25 @@
+use applicative::Applicative;
 use functor::Functor;
-use futures::Future;
+use futures::future::{Future, LocalFutureObj};
 use futures::FutureExt;
 use lifted::*;
+use std::boxed::PinBox;
 
 pub struct FutureKind;
 
 impl HKT for FutureKind {}
-impl<'a, A, B, F> Lift<'a, FutureKind, A, B> for F
+impl<'a, A, B, G, F> Lift<'a, FutureKind, A, B, G> for F
 where
-    F: Future<Item = A, Error = B> + 'a,
+    F: Future<Output = A> + 'a,
 {
-    fn lift(self) -> Lifted<'a, FutureKind, A, B> {
-        Lifted::Future(Box::new(self))
+    fn lift(self) -> Lifted<'a, FutureKind, A, B, G> {
+        Lifted::Future(LocalFutureObj::new(Box::new(self)))
     }
 }
 
-impl<'a, A, B> Unlift<FutureKind> for Lifted<'a, FutureKind, A, B> {
-    type Out = Box<Future<Item = A, Error = B> + 'a>;
+impl<'a, A, B, G> Unlift<FutureKind> for Lifted<'a, FutureKind, A, B, G> {
+    type Out = LocalFutureObj<'a, A>;
+
     fn unlift(self) -> <Self as Unlift<FutureKind>>::Out {
         match self {
             Lifted::Future(f) => f,
@@ -25,12 +28,34 @@ impl<'a, A, B> Unlift<FutureKind> for Lifted<'a, FutureKind, A, B> {
     }
 }
 
-impl<'a, Z> Functor<'a, FutureKind, Z> for FutureKind {
-    fn map<Func, A, B>(fa: Lifted<'a, FutureKind, A, Z>, func: Func) -> Lifted<'a, FutureKind, B, Z>
+impl<'a, Z, G> Functor<'a, FutureKind, Z, G> for FutureKind {
+    fn map<Func, A, B>(
+        fa: Lifted<'a, FutureKind, A, Z, G>,
+        func: Func,
+    ) -> Lifted<'a, FutureKind, B, Z, G>
     where
         Func: FnOnce(A) -> B + 'a,
     {
-        fa.unlift().map(func).lift()
+        Lifted::Future(LocalFutureObj::new(Box::new(fa.unlift().map(func))))
+    }
+}
+
+impl<'a, Z, G> Applicative<'a, FutureKind, Z, G> for FutureKind {
+    fn ap<A, B, Func>(
+        ff: Lifted<'a, FutureKind, Func, Z, G>,
+        fa: Lifted<'a, FutureKind, A, Z, G>,
+    ) -> Lifted<'a, FutureKind, B, Z, G>
+    where
+        Func: FnOnce(A) -> B + 'a,
+    {
+        let ff = ff.unlift();
+        let fa = fa.unlift();
+        ff.map(|ff| fa.map(|a| ff(a))).flatten().lift()
+    }
+
+    fn point<A>(a: A) -> Lifted<'a, FutureKind, A, Z, G> {
+        use futures::future;
+        future::lazy(|_| a).lift()
     }
 }
 
@@ -43,17 +68,20 @@ mod tests {
 
     #[test]
     fn test_lift() {
-        let f = future::ok::<i32, &str>(1).lift();
-        let f = FutureKind::map(f, |i| i * 2).unlift();
-        assert_eq!(block_on(f).unwrap(), 2)
+        // TODO: Fix type annotation
+        let f: Lifted<FutureKind, i32, Nothing, Nothing> = future::lazy(|_| 1).lift();
+        let f = <FutureKind as Functor<_>>::map(f, |i| i * 2).unlift();
+        assert_eq!(block_on(f), 2)
     }
 
     #[bench]
     fn bench_functor_map(b: &mut Bencher) {
         b.iter(|| {
             for _ in 0..10000 {
-                let f = future::ok::<String, &str>("foo".to_owned()).lift();
-                black_box(block_on(FutureKind::map(f, |s| s + "foo").unlift()).unwrap());
+                let f: Lifted<_, _, Nothing, Nothing> = future::lazy(|_| "foo").lift();
+                black_box(block_on(
+                    <FutureKind as Functor<_>>::map(f, |s| "foo".to_string() + s).unlift(),
+                ));
             }
         })
     }
@@ -62,8 +90,8 @@ mod tests {
     fn bench_native_map(b: &mut Bencher) {
         b.iter(|| {
             for _ in 0..10000 {
-                let f = future::ok::<String, &str>("foo".to_owned());
-                black_box(block_on(f.map(|i| i + "foo")).unwrap());
+                let f = future::lazy(|_| "foo");
+                black_box(block_on(f.map(|i| "foo".to_string() + i)));
             }
         })
     }
