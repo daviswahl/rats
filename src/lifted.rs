@@ -29,17 +29,14 @@ pub enum Lifted<
     G: 'static,
 {
     Option(Option<A>),
-    OptionRef(Option<&'a A>),
-    OptionMut(Option<&'a mut A>),
-
     VecDeque(VecDeque<A>),
 
     Result(Result<A, B>),
     OptionT(Box<OptionT<'a, G, A, B>>),
-    Kleisli(Box<Kleisli<'a, F, A, B>>),
-    Iterator(Box<Iterator<Item = A> + 'a>),
+    Kleisli(Box<dyn Kleisli<'a, F, A, B>>),
+    Iterator(Box<dyn Iterator<Item = A> + 'a>),
+    Future(Box<dyn Future<Item = A, Error = B> + 'a>),
 
-    Future(Box<Future<Item = A, Error = B> + 'a>),
     __Marker(*const F),
 }
 
