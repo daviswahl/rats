@@ -6,20 +6,32 @@ use std::boxed::FnBox;
 use std::marker::PhantomData;
 use std::rc::Rc;
 
-pub trait KleisliT<'a, F, A, B, Z = Nothing, G = Nothing> where F: 'static, B: 'a {
+pub trait KleisliT<'a, F, A, B, Z = Nothing, G = Nothing>
+where
+    F: 'static,
+    B: 'a,
+{
     fn run(&self, a: A) -> Lifted<'a, F, B, Z, G>;
 }
 
 pub trait KleisliExt<'a, F, A, B, Z = Nothing, G = Nothing>
 where
     F: 'static,
+    A: 'a,
     B: 'a,
     Self: Sized + KleisliT<'a, F, A, B, Z, G>,
 {
-    fn compose<Z2, K>(self, k: K) -> Compose<'a, F, A, B, Z2, Self, K, Z, G>
+    fn compose<Z2, K>(self, k: K) -> Compose<A, Self, K>
     where
         F: Monad<'a, F, Z, G>,
-        K: KleisliT<'a, F, Z2, A, Z, G>;
+        K: KleisliT<'a, F, Z2, A, Z, G>,
+    {
+        Compose {
+            k1: self,
+            k2: k,
+            marker: PhantomData,
+        }
+    }
 
     fn map<Z2, Func>(self, func: Func) -> Map<Z2, Self, Func>
     where
@@ -33,22 +45,13 @@ where
     }
 }
 
-impl<'a, F: 'static, A, B: 'a, K, Z, G> KleisliExt<'a, F, A, B, Z, G> for K
+impl<'a, F, A, B, K, Z, G> KleisliExt<'a, F, A, B, Z, G> for K
 where
     K: KleisliT<'a, F, A, B, Z, G>,
+    F: 'static,
+    A: 'a,
+    B: 'a,
 {
-    fn compose<Z2, K2>(self, k: K2) -> Compose<'a, F, A, B, Z2, K, K2, Z, G>
-    where
-        F: Monad<'a, F, Z, G>,
-        Self: Sized + KleisliT<'a, F, A, B, Z, G>,
-        K2: KleisliT<'a, F, Z2, A, Z, G>,
-    {
-        Compose {
-            k1: self,
-            k2: k,
-            marker: PhantomData,
-        }
-    }
 }
 
 pub struct Kleisli<'a, F, A, B, Z = Nothing, G = Nothing>(
@@ -74,26 +77,17 @@ where
 }
 
 /// Compose
-pub struct Compose<
-    'a,
-    F,
-    A,
-    B,
-    C,
-    K1,
-    K2,
-    Z = Nothing,
-    G = Nothing,
-> where F: 'static, A: 'a, B: 'a, C: 'a, Z: 'a {
+pub struct Compose<A, K1, K2> {
     k1: K1,
     k2: K2,
-    marker: PhantomData<&'a (F, A, B, C, Z, G)>,
+    marker: PhantomData<*const A>,
 }
 
-impl<'a, F, A, B, C, K1, K2, Z, G> KleisliT<'a, F, C, B, Z, G>
-    for Compose<'a, F, A, B, C, K1, K2, Z, G>
+impl<'a, F, A, B, C, K1, K2, Z, G> KleisliT<'a, F, C, B, Z, G> for Compose<A, K1, K2>
 where
-    F: Monad<'a, F, Z, G>,
+    A: 'a,
+    B: 'a,
+    F: Monad<'a, F, Z, G> + 'static,
     K1: KleisliT<'a, F, A, B, Z, G>,
     K2: KleisliT<'a, F, C, A, Z, G>,
 {
