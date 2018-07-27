@@ -84,7 +84,7 @@ impl<'a, F, A, B, C, K1, K2, Z, G> Kleisli<'a, F, C, B, Z, G> for Compose<A, K1,
 where
     A: 'a,
     B: 'a,
-    F: Monad<'a, F, Z, G> + 'static,
+    F: Monad<'a, F, Z, G>,
     K1: Kleisli<'a, F, A, B, Z, G>,
     K2: Kleisli<'a, F, C, A, Z, G>,
 {
@@ -106,7 +106,7 @@ impl<'a, F, A, B, C, K1, Func, Z, G> Kleisli<'a, F, A, C, Z, G> for Map<B, K1, F
 where
     B: 'a,
     C: 'a,
-    F: Functor<'a, F, Z, G> + 'static,
+    F: Functor<'a, F, Z, G>,
     K1: Kleisli<'a, F, A, B, Z, G> + 'a,
     RcFn<Func>: Fn(B) -> C + 'a,
 {
@@ -120,9 +120,9 @@ pub fn run<'a, F, A, B, Z, G>(
 ) -> impl Kleisli<'a, F, A, B, Z, G>
 where
     F: 'static,
+    G: 'static,
     B: 'a,
     Z: 'a,
-    G: 'static,
 {
     Run(Box::new(run))
 }

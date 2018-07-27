@@ -22,9 +22,9 @@ pub enum Lifted<
     G = Nothing, // The type of an optional nested HKT, G
 > where
     F: 'static,
+    G: 'static,
     A: 'a,
     B: 'a,
-    G: 'static,
 {
     Option(Option<A>),
     OptionRef(Option<&'a A>),
