@@ -8,12 +8,14 @@ use traverse::Traverse;
 pub struct VecDequeKind;
 impl HKT for VecDequeKind {}
 
+// Lift
 impl<'a, A> Lift<'a, VecDequeKind, A> for VecDeque<A> {
     fn lift(self) -> Lifted<'a, VecDequeKind, A> {
         Lifted::VecDeque(self)
     }
 }
 
+// Unlift
 impl<'a, A> Unlift<VecDequeKind> for Lifted<'a, VecDequeKind, A> {
     type Out = VecDeque<A>;
 
@@ -25,6 +27,7 @@ impl<'a, A> Unlift<VecDequeKind> for Lifted<'a, VecDequeKind, A> {
     }
 }
 
+// Functor
 impl<'a> Functor<'a, VecDequeKind> for VecDequeKind {
     fn map<Func: 'a, A, B>(
         fa: Lifted<'a, VecDequeKind, A, Nothing, Nothing>,
@@ -41,18 +44,7 @@ impl<'a> Functor<'a, VecDequeKind> for VecDequeKind {
     }
 }
 
-fn fold_right<A, B, Func>(fa: VecDeque<A>, acc: B, func: &Func) -> B
-where
-    Func: Fn(B, A) -> B,
-{
-    let mut acc = acc;
-    let mut tail = fa;
-    if let Some(head) = tail.pop_front() {
-        acc = func(fold_right(tail, acc, func), head)
-    }
-    acc
-}
-
+// Foldable
 impl<'a> Foldable<VecDequeKind> for VecDequeKind {
     fn fold_left<A, B, Func>(fa: Lifted<VecDequeKind, A>, acc: B, func: Func) -> B
     where
@@ -77,6 +69,19 @@ impl<'a> Foldable<VecDequeKind> for VecDequeKind {
     }
 }
 
+fn fold_right<A, B, Func>(fa: VecDeque<A>, acc: B, func: &Func) -> B
+where
+    Func: Fn(B, A) -> B,
+{
+    let mut acc = acc;
+    let mut tail = fa;
+    if let Some(head) = tail.pop_front() {
+        acc = func(fold_right(tail, acc, func), head)
+    }
+    acc
+}
+
+// Traverse
 impl<'a> Traverse<'a, VecDequeKind> for VecDequeKind {
     fn traverse<'g, Func, A, B, Z2, G2, H>(
         fa: Lifted<VecDequeKind, A>,
