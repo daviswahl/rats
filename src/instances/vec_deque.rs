@@ -27,6 +27,7 @@ impl<'a, A> Unlift<VecDequeKind> for Lifted<'a, VecDequeKind, A> {
     }
 }
 
+// UnliftRef
 impl<'a, A> UnliftRef<VecDequeKind> for Lifted<'a, VecDequeKind, A> {
     fn unlift_as_ref(&self) -> &<Self as Unlift<VecDequeKind>>::Out {
         match self {
@@ -36,6 +37,7 @@ impl<'a, A> UnliftRef<VecDequeKind> for Lifted<'a, VecDequeKind, A> {
     }
 }
 
+// UnliftMut
 impl<'a, A> UnliftMut<VecDequeKind> for Lifted<'a, VecDequeKind, A> {
     fn unlift_mut(&mut self) -> &mut <Self as Unlift<VecDequeKind>>::Out {
         match self {
@@ -45,20 +47,6 @@ impl<'a, A> UnliftMut<VecDequeKind> for Lifted<'a, VecDequeKind, A> {
     }
 }
 
-// Inherent
-
-//impl<'a, A> Lifted<'a, VecDequeKind, A> {
-//    pub fn push_front(&mut self, a: A) -> &mut Self {
-//        self.unlift_mut().push_front(a);
-//        self
-//    }
-//
-//    pub fn push_back(&mut self, a: A) -> &mut Self {
-//        self.unlift_mut().push_back(a);
-//        self
-//    }
-//}
-// Functor
 impl<'a> Functor<'a, VecDequeKind> for VecDequeKind {
     fn map<Func: 'a, A, B>(
         fa: Lifted<'a, VecDequeKind, A, Nothing, Nothing>,
@@ -76,7 +64,7 @@ impl<'a> Functor<'a, VecDequeKind> for VecDequeKind {
 }
 
 // Foldable
-// Could probably be non consuming
+// Could probably be non consuming?
 impl<'a> Foldable<VecDequeKind> for VecDequeKind {
     fn fold_left<A, B, Func>(fa: Lifted<VecDequeKind, A>, acc: B, func: Func) -> B
     where
