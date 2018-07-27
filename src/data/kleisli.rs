@@ -1,6 +1,8 @@
 use functor::Functor;
+use lifted::Lift;
 use lifted::Lifted;
 use lifted::Nothing;
+use lifted::Unlift;
 use monad::Monad;
 use std::marker::PhantomData;
 use std::rc::Rc;
@@ -20,6 +22,13 @@ where
     B: 'a,
     Self: Sized + Kleisli<'a, F, A, B, Z, G>,
 {
+    fn runlift(&self, a: A) -> <Lifted<'a, F, B, Z, G> as Unlift<F>>::Out
+    where
+        Lifted<'a, F, B, Z, G>: Unlift<F>,
+    {
+        Kleisli::<_, _, _, _, _>::run(self, a).unlift()
+    }
+
     fn compose<Z2, K>(self, k: K) -> Compose<A, Self, K>
     where
         F: Monad<'a, F, Z, G>,
@@ -50,8 +59,7 @@ where
     F: 'static,
     A: 'a,
     B: 'a,
-{
-}
+{}
 
 pub struct Run<'a, F, A, B, Z = Nothing, G = Nothing>(Box<Fn(A) -> Lifted<'a, F, B, Z, G> + 'a>)
 where
@@ -84,7 +92,7 @@ impl<'a, F, A, B, C, K1, K2, Z, G> Kleisli<'a, F, C, B, Z, G> for Compose<A, K1,
 where
     A: 'a,
     B: 'a,
-    F: Monad<'a, F, Z, G> + 'static,
+    F: Monad<'a, F, Z, G>,
     K1: Kleisli<'a, F, A, B, Z, G>,
     K2: Kleisli<'a, F, C, A, Z, G>,
 {
@@ -93,9 +101,9 @@ where
     }
 }
 
-// Map
-// RC may not be necessary here and could be a byproduct of misunderstood lifetimes throughout
-// the whole library.
+/// Map
+/// RC may not be necessary here and could be a byproduct of a misunderstanding of lifetimes throughout
+/// the whole library.
 pub struct Map<B, K1, Func> {
     k: K1,
     func: RcFn<Func>,
@@ -120,11 +128,22 @@ pub fn run<'a, F, A, B, Z, G>(
 ) -> impl Kleisli<'a, F, A, B, Z, G>
 where
     F: 'static,
+    G: 'static,
     B: 'a,
     Z: 'a,
-    G: 'static,
 {
     Run(Box::new(run))
+}
+
+pub fn lift<'a, F, A, B, Z, G, L>(run: impl Fn(A) -> L + 'a) -> impl Kleisli<'a, F, A, B, Z, G>
+where
+    L: Lift<'a, F, B, Z, G> + 'a,
+    F: 'static,
+    G: 'static,
+    B: 'a,
+    Z: 'a,
+{
+    self::run(move |a| run(a).lift())
 }
 
 pub struct RcFn<F>(Rc<F>);
@@ -163,35 +182,79 @@ where
         self.0.call(args)
     }
 }
+
+///
+impl<'a, F, A, B, Z, G> Fn<(A,)> for Kleisli<'a, F, A, B, Z, G>
+where
+    Lifted<'a, F, B, Z, G>: Unlift<F>,
+    Self: Sized + 'a,
+    A: 'a,
+    G: 'static,
+    B: 'a,
+    Z: 'a,
+    F: 'static,
+{
+    extern "rust-call" fn call(&self, args: (A,)) -> Self::Output {
+        self.run(args.0).unlift()
+    }
+}
+
+impl<'a, F, A, B, Z, G> FnOnce<(A,)> for Kleisli<'a, F, A, B, Z, G>
+where
+    Lifted<'a, F, B, Z, G>: Unlift<F>,
+    Self: Sized + 'a,
+    B: 'a,
+    G: 'static,
+    Z: 'a,
+    F: 'static,
+{
+    type Output = <Lifted<'a, F, B, Z, G> as Unlift<F>>::Out;
+
+    extern "rust-call" fn call_once(self, args: (A,)) -> Self::Output {
+        self.run(args.0).unlift()
+    }
+}
+
+impl<'a, F, A, B, Z, G> FnMut<(A,)> for Kleisli<'a, F, A, B, Z, G>
+where
+    Lifted<'a, F, B, Z, G>: Unlift<F>,
+    Self: Sized,
+    A: 'a,
+    G: 'static,
+    B: 'a,
+    Z: 'a,
+    F: 'static,
+{
+    extern "rust-call" fn call_mut(&mut self, args: (A,)) -> Self::Output {
+        self.run(args.0).unlift()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use data::kleisli;
-    use lifted::*;
 
     #[test]
     fn test_compose_and_map() {
-        let parse = kleisli::run(|s: &str| s.parse::<i32>().map_err(|_| "parse error").lift());
+        let parse = kleisli::lift(|s: &str| s.parse::<i32>().map_err(|_| "parse error"));
 
-        let reciprocal = kleisli::run(|i: i32| {
+        let reciprocal = kleisli::lift(|i: i32| {
             if i != 0 {
                 Ok(1.0 / i as f32)
             } else {
                 Err("divide by 0")
-            }.lift()
+            }
         });
 
         let parse_and_recriprocal = reciprocal.compose(parse);
 
-        assert_eq!(parse_and_recriprocal.run("123").unlift(), Ok(0.008130081));
+        assert_eq!(parse_and_recriprocal.runlift("123"), Ok(0.008130081));
 
-        assert_eq!(
-            parse_and_recriprocal.run("yospos").unlift(),
-            Err("parse error")
-        );
+        assert_eq!(parse_and_recriprocal.runlift("yospos"), Err("parse error"));
 
         let doubled = parse_and_recriprocal.map(|f| f * 2 as f32);
-        assert_eq!(doubled.run("123").unlift(), Ok(0.016260162));
-        assert_eq!(doubled.run("0").unlift(), Err("divide by 0"));
+        assert_eq!(doubled.runlift("123"), Ok(0.016260162));
+        assert_eq!(doubled.runlift("0"), Err("divide by 0"));
     }
 }

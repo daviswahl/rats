@@ -10,6 +10,7 @@ where
     fn fold_left<A, B, Func>(fa: Lifted<F_, A, Z, G>, acc: B, f: Func) -> B
     where
         Func: Fn(B, A) -> B;
+
     fn fold_right<A, B, Func>(fa: Lifted<F_, A, Z, G>, acc: B, f: &Func) -> B
     where
         Func: Fn(B, A) -> B;
