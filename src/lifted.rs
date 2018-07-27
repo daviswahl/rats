@@ -78,8 +78,7 @@ where
 
 impl<'a, A, B, G, F> DerefMut for Lifted<'a, F, A, B, G>
 where
-    Lifted<'a, F, A, B, G>: UnliftMut<F>,
-    Lifted<'a, F, A, B, G>: Deref<Target = <Lifted<'a, F, A, B, G> as Unlift<F>>::Out>,
+    Lifted<'a, F, A, B, G>: UnliftMut<F> + Deref<Target = <Self as Unlift<F>>::Out>,
 {
     fn deref_mut(&mut self) -> &mut <Self as Deref>::Target {
         self.unlift_mut()
@@ -100,5 +99,6 @@ mod tests {
     #[test]
     fn deref_test() {
         let s = Some("foo".to_owned()).lift();
+        let _r = &*s;
     }
 }
