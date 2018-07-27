@@ -3,7 +3,6 @@ use functor::Functor;
 use futures::future::{Future, LocalFutureObj};
 use futures::FutureExt;
 use lifted::*;
-use std::boxed::PinBox;
 
 pub struct FutureKind;
 
@@ -62,9 +61,31 @@ impl<'a, Z, G> Applicative<'a, FutureKind, Z, G> for FutureKind {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use data::kleisli;
+    use data::kleisli::KleisliExt;
     use futures::executor::block_on;
     use futures::future;
     use test::*;
+
+    #[test]
+    fn test_kleisli_map() {
+        let k = kleisli::lift::<FutureKind, i32, i32, Nothing, Nothing, _, _>(|i: i32| {
+            future::lazy(move |_| i)
+        });
+        let k = k.map(|i| i * 2);
+        assert_eq!(block_on(k.runlift(15)), 30);
+    }
+
+    #[test]
+    fn test_applicative() {
+        let fut: Lifted<FutureKind, &str, Nothing, Nothing> = future::lazy(|_| "yospos").lift();
+        let fut2: Lifted<FutureKind, &str, Nothing, Nothing> = future::lazy(|_| "bictch").lift();
+
+        assert_eq!(
+            block_on(FutureKind::product(fut, fut2).unlift()),
+            ("yospos", "bictch")
+        )
+    }
 
     #[test]
     fn test_lift() {

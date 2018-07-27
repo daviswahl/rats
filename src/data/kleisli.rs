@@ -135,9 +135,10 @@ where
     Run(Box::new(run))
 }
 
-pub fn lift<'a, F, A, B, Z, G, L>(run: impl Fn(A) -> L + 'a) -> impl Kleisli<'a, F, A, B, Z, G>
+pub fn lift<'a, F, A, B, Z, G, Func, L>(run: Func) -> impl Kleisli<'a, F, A, B, Z, G>
 where
     L: Lift<'a, F, B, Z, G> + 'a,
+    Func: Fn(A) -> L + 'a,
     F: 'static,
     G: 'static,
     B: 'a,
