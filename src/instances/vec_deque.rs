@@ -35,7 +35,7 @@ impl<'a> Functor<'a, VecDequeKind> for VecDequeKind {
     {
         fa.unlift()
             .into_iter()
-            .map(|f| func(f))
+            .map(func)
             .collect::<VecDeque<B>>()
             .lift()
     }
@@ -151,8 +151,6 @@ mod tests {
             vc.push_back(i)
         }
 
-        use std::panic;
-        let _result =
-            panic::catch_unwind(|| VecDequeKind::fold_right(vc.lift(), 0, &|acc, i| acc + i));
+        VecDequeKind::fold_right(vc.lift(), 0, &|acc, i| acc + i);
     }
 }

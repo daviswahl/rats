@@ -30,7 +30,7 @@ impl<'a> Functor<'a, IteratorKind> for IteratorKind {
     where
         Func: Fn(A) -> B + 'a,
     {
-        fa.unlift().map(move |a| func(a)).lift()
+        fa.unlift().map(func).lift()
     }
 }
 

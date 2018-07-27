@@ -30,7 +30,7 @@ impl<'a, Z> Functor<'a, FutureKind, Z> for FutureKind {
     where
         Func: FnOnce(A) -> B + 'a,
     {
-        fa.unlift().map(|f| func(f)).lift()
+        fa.unlift().map(func).lift()
     }
 }
 

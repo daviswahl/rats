@@ -50,7 +50,7 @@ impl<'a> Applicative<'a, OptionKind> for OptionKind {
     {
         let ff = ff.unlift();
         let fa = fa.unlift();
-        ff.and_then(|f| fa.map(|a| f(a))).lift()
+        ff.and_then(|f| fa.map(f)).lift()
     }
 
     fn point<A>(a: A) -> Lifted<'a, OptionKind, A> {
