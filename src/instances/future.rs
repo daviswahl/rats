@@ -6,19 +6,17 @@ use lifted::*;
 pub struct FutureKind;
 
 impl HKT for FutureKind {}
-impl<'f> HKT for &'f FutureKind {}
-
-impl<'f, A, B, F> Lift<'f, FutureKind, A, B> for F
+impl<'a, A, B, F> Lift<'a, FutureKind, A, B> for F
 where
-    F: Future<Item = A, Error = B> + 'f,
+    F: Future<Item = A, Error = B> + 'a,
 {
-    fn lift(self) -> Lifted<'f, FutureKind, A, B> {
+    fn lift(self) -> Lifted<'a, FutureKind, A, B> {
         Lifted::Future(Box::new(self))
     }
 }
 
-impl<'f, A, B> Unlift<FutureKind> for Lifted<'f, FutureKind, A, B> {
-    type Out = Box<Future<Item = A, Error = B> + 'f>;
+impl<'a, A, B> Unlift<FutureKind> for Lifted<'a, FutureKind, A, B> {
+    type Out = Box<Future<Item = A, Error = B> + 'a>;
     fn unlift(self) -> <Self as Unlift<FutureKind>>::Out {
         match self {
             Lifted::Future(f) => f,
@@ -27,10 +25,10 @@ impl<'f, A, B> Unlift<FutureKind> for Lifted<'f, FutureKind, A, B> {
     }
 }
 
-impl<'f, Z> Functor<'f, FutureKind, Z> for FutureKind {
-    fn map<Func, A, B>(fa: Lifted<'f, FutureKind, A, Z>, func: Func) -> Lifted<'f, FutureKind, B, Z>
+impl<'a, Z> Functor<'a, FutureKind, Z> for FutureKind {
+    fn map<Func, A, B>(fa: Lifted<'a, FutureKind, A, Z>, func: Func) -> Lifted<'a, FutureKind, B, Z>
     where
-        Func: FnOnce(A) -> B + 'f,
+        Func: FnOnce(A) -> B + 'a,
     {
         fa.unlift().map(|f| func(f)).lift()
     }
@@ -41,6 +39,7 @@ mod tests {
     use super::*;
     use futures::executor::block_on;
     use futures::future;
+    use test::*;
 
     #[test]
     fn test_lift() {
@@ -49,16 +48,13 @@ mod tests {
         assert_eq!(block_on(f).unwrap(), 2)
     }
 
-    use super::*;
-    use test::*;
-
     #[bench]
     fn bench_functor_map(b: &mut Bencher) {
         b.iter(|| {
-            for i in 0..10000 {
+            for _ in 0..10000 {
                 let f = future::ok::<&str, &str>("foo").lift();
                 black_box(
-                    block_on(FutureKind::map(f, |s| "foo".to_string() + "foo").unlift()).unwrap(),
+                    block_on(FutureKind::map(f, |s| "foo".to_string() + s).unlift()).unwrap(),
                 );
             }
         })
@@ -67,7 +63,7 @@ mod tests {
     #[bench]
     fn bench_native_map(b: &mut Bencher) {
         b.iter(|| {
-            for i in 0..10000 {
+            for _ in 0..10000 {
                 let f = future::ok::<String, &str>("foo".to_owned());
                 black_box(block_on(f.map(|i| i + "foo")).unwrap());
             }

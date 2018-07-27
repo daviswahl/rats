@@ -87,7 +87,6 @@ impl<'a, Z> Monad<'a, ResultKind, Z> for ResultKind {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use monad::Monad;
     use test::*;
 
     #[test]
@@ -100,8 +99,9 @@ mod tests {
     }
     #[test]
     fn test_lift_unlift() {
-        let mut foo = "foo".to_owned();
+        let foo = "foo".to_owned();
         let o: Lifted<_, _, &str> = Ok(&foo).lift();
+        o.unlift().unwrap();
     }
 
     #[bench]
@@ -109,7 +109,9 @@ mod tests {
         b.iter(|| {
             for i in 0..10000 {
                 black_box(
-                    <ResultKind as Functor<_, &str, _>>::map(Ok(i).lift(), |i| i * 2).unlift(),
+                    <ResultKind as Functor<_, &str, _>>::map(Ok(i).lift(), |i| i * 2)
+                        .unlift()
+                        .unwrap(),
                 );
             }
         })
@@ -119,7 +121,7 @@ mod tests {
     fn bench_native_map(b: &mut Bencher) {
         b.iter(|| {
             for i in 0..10000 {
-                black_box(Ok::<_, &str>(i).map(|i| i * 2));
+                black_box(Ok::<_, &str>(i).map(|i| i * 2).unwrap());
             }
         })
     }

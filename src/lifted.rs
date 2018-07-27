@@ -1,10 +1,9 @@
-use data::kleisli::KleisliT;
+use data::kleisli::Kleisli;
 use data::option_t::OptionT;
 use futures::Future;
 use std::collections::VecDeque;
-use std::marker::PhantomData;
 
-pub trait HKT {}
+pub trait HKT: 'static {}
 
 pub struct Nothing {}
 impl Iterator for Nothing {
@@ -17,12 +16,12 @@ impl Iterator for Nothing {
 
 pub enum Lifted<
     'a,
-    F: 'static,  // The HKT of this Lifted
+    F,           // The HKT of this Lifted
     A,           // The type of the first parameter of F
     B = Nothing, // The type of a second optional parameter to F
     G = Nothing, // The type of an optional nested HKT, G
 > where
-    F: 'a,
+    F: 'static,
     A: 'a,
     B: 'a,
     G: 'static,
@@ -35,11 +34,11 @@ pub enum Lifted<
 
     Result(Result<A, B>),
     OptionT(Box<OptionT<'a, G, A, B>>),
-    Kleisli(Box<KleisliT<'a, F, A, B>>),
+    Kleisli(Box<Kleisli<'a, F, A, B>>),
     Iterator(Box<Iterator<Item = A> + 'a>),
 
     Future(Box<Future<Item = A, Error = B> + 'a>),
-    __Marker(F),
+    __Marker(*const F),
 }
 
 pub trait Lift<'a, F, A, Z = Nothing, G = Nothing> {

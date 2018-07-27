@@ -1,5 +1,5 @@
 use functor::Functor;
-use lifted::{Lift, Lifted, Nothing, Unlift, HKT};
+use lifted::{Lift, Lifted, Unlift, HKT};
 
 pub struct IteratorKind;
 

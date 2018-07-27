@@ -1,5 +1,4 @@
 use functor::Functor;
-use lifted::Unlift;
 use lifted::{Lifted, Nothing};
 
 pub struct OptionT<'f, F, A, Z = Nothing>

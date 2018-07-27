@@ -2,14 +2,12 @@ use applicative::Applicative;
 use functor::Functor;
 use lifted::Lift;
 use lifted::Unlift;
-use lifted::{Lifted, Nothing, HKT};
+use lifted::{Lifted, HKT};
 use monad::Monad;
 
 pub struct OptionKind;
 
 impl HKT for OptionKind {}
-impl<'a> HKT for &'a OptionKind {}
-impl<'a> HKT for &'a mut OptionKind {}
 
 impl<'a, A, B, G> Unlift<OptionKind> for Lifted<'a, OptionKind, A, B, G> {
     type Out = Option<A>;
@@ -28,8 +26,7 @@ impl<'a, A> Lift<'a, OptionKind, A> for Option<A> {
     }
 }
 
-/// Functor
-///
+// Functor
 impl<'a> Functor<'a, OptionKind> for OptionKind {
     fn map<Func, A, B>(fa: Lifted<'a, OptionKind, A>, func: Func) -> Lifted<'a, OptionKind, B>
     where
@@ -42,9 +39,7 @@ impl<'a> Functor<'a, OptionKind> for OptionKind {
     }
 }
 
-/// Applicative
-///
-
+// Applicative
 impl<'a> Applicative<'a, OptionKind> for OptionKind {
     fn ap<A, B, Func>(
         ff: Lifted<'a, OptionKind, Func>,
@@ -53,7 +48,9 @@ impl<'a> Applicative<'a, OptionKind> for OptionKind {
     where
         Func: FnOnce(A) -> B + 'a,
     {
-        unimplemented!()
+        let ff = ff.unlift();
+        let fa = fa.unlift();
+        ff.and_then(|f| fa.map(|a| f(a))).lift()
     }
 
     fn point<A>(a: A) -> Lifted<'a, OptionKind, A> {
@@ -61,9 +58,7 @@ impl<'a> Applicative<'a, OptionKind> for OptionKind {
     }
 }
 
-/// Monad
-///
-
+// Monad
 impl<'a> Monad<'a, OptionKind> for OptionKind {
     fn flat_map<A, B, Func>(fa: Lifted<'a, OptionKind, A>, func: Func) -> Lifted<'a, OptionKind, B>
     where
@@ -75,6 +70,7 @@ impl<'a> Monad<'a, OptionKind> for OptionKind {
         }
     }
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -82,7 +78,7 @@ mod tests {
 
     #[test]
     fn test_lift_unlift() {
-        let mut foo = "foo".to_owned();
+        let foo = "foo".to_owned();
         let o = Some(&foo).lift();
 
         let r = <OptionKind as Monad<_, _, _>>::map(o, |i| i.split_at(1));

@@ -2,11 +2,10 @@ use functor::Functor;
 use lifted::Lifted;
 use lifted::Nothing;
 use monad::Monad;
-use std::boxed::FnBox;
 use std::marker::PhantomData;
 use std::rc::Rc;
 
-pub trait KleisliT<'a, F, A, B, Z = Nothing, G = Nothing>
+pub trait Kleisli<'a, F, A, B, Z = Nothing, G = Nothing>
 where
     F: 'static,
     B: 'a,
@@ -19,12 +18,12 @@ where
     F: 'static,
     A: 'a,
     B: 'a,
-    Self: Sized + KleisliT<'a, F, A, B, Z, G>,
+    Self: Sized + Kleisli<'a, F, A, B, Z, G>,
 {
     fn compose<Z2, K>(self, k: K) -> Compose<A, Self, K>
     where
         F: Monad<'a, F, Z, G>,
-        K: KleisliT<'a, F, Z2, A, Z, G>,
+        K: Kleisli<'a, F, Z2, A, Z, G>,
     {
         Compose {
             k1: self,
@@ -47,16 +46,14 @@ where
 
 impl<'a, F, A, B, K, Z, G> KleisliExt<'a, F, A, B, Z, G> for K
 where
-    K: KleisliT<'a, F, A, B, Z, G>,
+    K: Kleisli<'a, F, A, B, Z, G>,
     F: 'static,
     A: 'a,
     B: 'a,
 {
 }
 
-pub struct Kleisli<'a, F, A, B, Z = Nothing, G = Nothing>(
-    Box<Fn(A) -> Lifted<'a, F, B, Z, G> + 'a>,
-)
+pub struct Run<'a, F, A, B, Z = Nothing, G = Nothing>(Box<Fn(A) -> Lifted<'a, F, B, Z, G> + 'a>)
 where
     F: 'static,
     G: 'static,
@@ -64,7 +61,7 @@ where
     B: 'a,
     Z: 'a;
 
-impl<'a, F, A, B, Z, G> KleisliT<'a, F, A, B, Z, G> for Kleisli<'a, F, A, B, Z, G>
+impl<'a, F, A, B, Z, G> Kleisli<'a, F, A, B, Z, G> for Run<'a, F, A, B, Z, G>
 where
     F: 'static,
     B: 'a,
@@ -83,32 +80,34 @@ pub struct Compose<A, K1, K2> {
     marker: PhantomData<*const A>,
 }
 
-impl<'a, F, A, B, C, K1, K2, Z, G> KleisliT<'a, F, C, B, Z, G> for Compose<A, K1, K2>
+impl<'a, F, A, B, C, K1, K2, Z, G> Kleisli<'a, F, C, B, Z, G> for Compose<A, K1, K2>
 where
     A: 'a,
     B: 'a,
     F: Monad<'a, F, Z, G> + 'static,
-    K1: KleisliT<'a, F, A, B, Z, G>,
-    K2: KleisliT<'a, F, C, A, Z, G>,
+    K1: Kleisli<'a, F, A, B, Z, G>,
+    K2: Kleisli<'a, F, C, A, Z, G>,
 {
     fn run(&self, a: C) -> Lifted<'a, F, B, Z, G> {
         F::flat_map(self.k2.run(a), |a| self.k1.run(a))
     }
 }
 
-/// Map
+// Map
+// RC may not be necessary here and could be a byproduct of misunderstood lifetimes throughout
+// the whole library.
 pub struct Map<B, K1, Func> {
     k: K1,
     func: RcFn<Func>,
     marker: PhantomData<*const B>,
 }
 
-impl<'a, F, A, B, C, K1, Func, Z, G> KleisliT<'a, F, A, C, Z, G> for Map<B, K1, Func>
+impl<'a, F, A, B, C, K1, Func, Z, G> Kleisli<'a, F, A, C, Z, G> for Map<B, K1, Func>
 where
     B: 'a,
     C: 'a,
     F: Functor<'a, F, Z, G> + 'static,
-    K1: KleisliT<'a, F, A, B, Z, G> + 'a,
+    K1: Kleisli<'a, F, A, B, Z, G> + 'a,
     RcFn<Func>: Fn(B) -> C + 'a,
 {
     fn run(&self, a: A) -> Lifted<'a, F, C, Z, G> {
@@ -116,10 +115,16 @@ where
     }
 }
 
-fn apply<'a, F: 'static, A, B: 'a, Z: 'a, G: 'static>(
+pub fn run<'a, F, A, B, Z, G>(
     run: impl Fn(A) -> Lifted<'a, F, B, Z, G> + 'a,
-) -> impl KleisliT<'a, F, A, B, Z, G> {
-    Kleisli(Box::new(run))
+) -> impl Kleisli<'a, F, A, B, Z, G>
+where
+    F: 'static,
+    B: 'a,
+    Z: 'a,
+    G: 'static,
+{
+    Run(Box::new(run))
 }
 
 pub struct RcFn<F>(Rc<F>);
@@ -166,9 +171,9 @@ mod tests {
 
     #[test]
     fn test_compose_and_map() {
-        let parse = kleisli::apply(|s: &str| s.parse::<i32>().map_err(|_| "parse error").lift());
+        let parse = kleisli::run(|s: &str| s.parse::<i32>().map_err(|_| "parse error").lift());
 
-        let reciprocal = kleisli::apply(|i: i32| {
+        let reciprocal = kleisli::run(|i: i32| {
             if i != 0 {
                 Ok(1.0 / i as f32)
             } else {

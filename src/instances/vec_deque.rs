@@ -134,7 +134,6 @@ mod tests {
 
     #[test]
     fn fold_m() {
-        use monoid;
         let mut v = VecDeque::new();
         v.push_back(1);
         v.push_back(2);
@@ -145,6 +144,7 @@ mod tests {
     }
 
     //#[test]
+    #[allow(dead_code)]
     fn blows_stack() {
         let mut vc = VecDeque::new();
         for i in 0..10000 {
@@ -152,7 +152,7 @@ mod tests {
         }
 
         use std::panic;
-        let result =
+        let _result =
             panic::catch_unwind(|| VecDequeKind::fold_right(vc.lift(), 0, &|acc, i| acc + i));
     }
 }

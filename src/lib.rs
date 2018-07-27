@@ -18,7 +18,6 @@ pub mod monoid;
 pub mod semigroup;
 pub mod traverse;
 // pub mod trampoline;
-use instances::future;
 // TODO: Put this somewhere.
 pub fn identity<A>(a: A) -> A {
     a

@@ -1,7 +1,6 @@
-use data::option_t;
 use data::option_t::OptionT;
 use functor::Functor;
-use lifted::{Lift, Lifted, Nothing, Unlift, HKT};
+use lifted::{Lift, Lifted, Unlift, HKT};
 
 struct OptionTKind;
 impl HKT for OptionTKind {}
@@ -42,7 +41,6 @@ impl<'a, G, A, Z> Unlift<OptionTKind> for Lifted<'a, OptionTKind, A, Z, G> {
 mod tests {
     use super::*;
     use std::collections::VecDeque;
-    use std::marker::PhantomData;
 
     #[test]
     fn test_lift() {
@@ -53,6 +51,7 @@ mod tests {
         let f = OptionT {
             value: Some(v.lift()),
         }.lift();
+        f.unlift();
     }
 
     #[test]
