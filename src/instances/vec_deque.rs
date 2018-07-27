@@ -27,6 +27,30 @@ impl<'a, A> Unlift<VecDequeKind> for Lifted<'a, VecDequeKind, A> {
     }
 }
 
+impl<'a, A> UnliftMut<VecDequeKind> for Lifted<'a, VecDequeKind, A> {
+    type Out = VecDeque<A>;
+
+    fn unlift_mut(&mut self) -> &mut <Self as UnliftMut<VecDequeKind>>::Out {
+        match self {
+            Lifted::VecDeque(ref mut a) => a,
+            _ => unimplemented!(),
+        }
+    }
+}
+
+// Inherent
+
+impl<'a, A> Lifted<'a, VecDequeKind, A> {
+    pub fn push_front(&mut self, a: A) -> &mut Self {
+        self.unlift_mut().push_front(a);
+        self
+    }
+
+    pub fn push_back(&mut self, a: A) -> &mut Self {
+        self.unlift_mut().push_back(a);
+        self
+    }
+}
 // Functor
 impl<'a> Functor<'a, VecDequeKind> for VecDequeKind {
     fn map<Func: 'a, A, B>(
@@ -45,6 +69,7 @@ impl<'a> Functor<'a, VecDequeKind> for VecDequeKind {
 }
 
 // Foldable
+// Could probably be non consuming
 impl<'a> Foldable<VecDequeKind> for VecDequeKind {
     fn fold_left<A, B, Func>(fa: Lifted<VecDequeKind, A>, acc: B, func: Func) -> B
     where
@@ -93,11 +118,9 @@ impl<'a> Traverse<'a, VecDequeKind> for VecDequeKind {
     {
         let acc = G2::point(VecDeque::new().lift());
         VecDequeKind::fold_right(fa, acc, &|acc, a| {
-            G2::map2(func(a), acc, |(a, b)| {
-                // need to add a direct push method
-                let mut v = b.unlift();
-                v.push_back(a);
-                v.lift()
+            G2::map2(func(a), acc, |(a, mut b)| {
+                b.push_back(a);
+                b
             })
         })
     }
@@ -115,6 +138,19 @@ mod tests {
         v.lift().unlift();
     }
 
+    #[test]
+    fn test_inherent_methods() {
+        let mut v = VecDeque::new().lift();
+        v.push_front("foo");
+
+        let mut expected = VecDeque::new();
+        expected.push_front("foo");
+        assert_eq!(v.unlift(), expected);
+
+        let mut v = VecDeque::new().lift();
+        v.push_back("foo");
+        assert_eq!(v.unlift(), expected);
+    }
     #[test]
     fn fold_left() {
         let mut v = VecDeque::new();
@@ -148,6 +184,7 @@ mod tests {
         assert_eq!(result, 6)
     }
 
+    // Uncomment to blow stack
     //#[test]
     #[allow(dead_code)]
     fn blows_stack() {

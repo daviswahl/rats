@@ -63,6 +63,11 @@ pub trait UnliftAsRef<F> {
     fn unlift(&self) -> Self::Out;
 }
 
+pub trait UnliftMut<F> {
+    type Out;
+    fn unlift_mut(&mut self) -> &mut Self::Out;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
