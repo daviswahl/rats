@@ -1,6 +1,6 @@
 use data::kleisli::Kleisli;
 use data::option_t::OptionT;
-use futures::Future;
+use futures::future::FutureObj;
 use std::collections::VecDeque;
 use std::ops::Deref;
 use std::ops::DerefMut;
@@ -35,7 +35,7 @@ pub enum Lifted<
     OptionT(Box<OptionT<'a, G, A, B>>),
     Kleisli(Box<dyn Kleisli<'a, F, A, B>>),
     Iterator(Box<dyn Iterator<Item = A> + 'a>),
-    Future(Box<dyn Future<Item = A, Error = B> + 'a>),
+    Future(FutureObj<'a, A>),
 
     __Marker(*const F),
 }

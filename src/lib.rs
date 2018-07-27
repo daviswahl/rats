@@ -2,6 +2,7 @@
 #![feature(fn_traits)]
 #![feature(unboxed_closures)]
 #![feature(tool_attributes)]
+#![feature(futures_api)]
 #![feature(fnbox)]
 #![feature(box_syntax)]
 extern crate core;
