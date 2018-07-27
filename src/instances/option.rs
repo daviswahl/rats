@@ -2,6 +2,8 @@ use applicative::Applicative;
 use functor::Functor;
 use lifted::Lift;
 use lifted::Unlift;
+use lifted::UnliftMut;
+use lifted::UnliftRef;
 use lifted::{Lifted, HKT};
 use monad::Monad;
 
@@ -15,6 +17,24 @@ impl<'a, A, B, G> Unlift<OptionKind> for Lifted<'a, OptionKind, A, B, G> {
     fn unlift(self) -> <Self as Unlift<OptionKind>>::Out {
         match self {
             Lifted::Option(o) => o,
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl<'a, A, B, G> UnliftRef<OptionKind> for Lifted<'a, OptionKind, A, B, G> {
+    fn unlift_as_ref(&self) -> &<Self as Unlift<OptionKind>>::Out {
+        match self {
+            Lifted::Option(ref o) => o,
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl<'a, A, B, G> UnliftMut<OptionKind> for Lifted<'a, OptionKind, A, B, G> {
+    fn unlift_mut(&mut self) -> &mut <Self as Unlift<OptionKind>>::Out {
+        match self {
+            Lifted::Option(ref mut o) => o,
             _ => unreachable!(),
         }
     }

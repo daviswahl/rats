@@ -27,10 +27,17 @@ impl<'a, A> Unlift<VecDequeKind> for Lifted<'a, VecDequeKind, A> {
     }
 }
 
-impl<'a, A> UnliftMut<VecDequeKind> for Lifted<'a, VecDequeKind, A> {
-    type Out = VecDeque<A>;
+impl<'a, A> UnliftRef<VecDequeKind> for Lifted<'a, VecDequeKind, A> {
+    fn unlift_as_ref(&self) -> &<Self as Unlift<VecDequeKind>>::Out {
+        match self {
+            Lifted::VecDeque(ref a) => a,
+            _ => unimplemented!(),
+        }
+    }
+}
 
-    fn unlift_mut(&mut self) -> &mut <Self as UnliftMut<VecDequeKind>>::Out {
+impl<'a, A> UnliftMut<VecDequeKind> for Lifted<'a, VecDequeKind, A> {
+    fn unlift_mut(&mut self) -> &mut <Self as Unlift<VecDequeKind>>::Out {
         match self {
             Lifted::VecDeque(ref mut a) => a,
             _ => unimplemented!(),
@@ -40,17 +47,17 @@ impl<'a, A> UnliftMut<VecDequeKind> for Lifted<'a, VecDequeKind, A> {
 
 // Inherent
 
-impl<'a, A> Lifted<'a, VecDequeKind, A> {
-    pub fn push_front(&mut self, a: A) -> &mut Self {
-        self.unlift_mut().push_front(a);
-        self
-    }
-
-    pub fn push_back(&mut self, a: A) -> &mut Self {
-        self.unlift_mut().push_back(a);
-        self
-    }
-}
+//impl<'a, A> Lifted<'a, VecDequeKind, A> {
+//    pub fn push_front(&mut self, a: A) -> &mut Self {
+//        self.unlift_mut().push_front(a);
+//        self
+//    }
+//
+//    pub fn push_back(&mut self, a: A) -> &mut Self {
+//        self.unlift_mut().push_back(a);
+//        self
+//    }
+//}
 // Functor
 impl<'a> Functor<'a, VecDequeKind> for VecDequeKind {
     fn map<Func: 'a, A, B>(
