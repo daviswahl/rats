@@ -3,8 +3,10 @@
 #![feature(unboxed_closures)]
 #![feature(tool_attributes)]
 #![feature(futures_api)]
+extern crate either;
 extern crate futures;
 extern crate test;
+
 pub mod applicative;
 pub mod data;
 pub mod foldable;

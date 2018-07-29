@@ -1,5 +1,6 @@
 use data::kleisli::Kleisli;
 use data::option_t::OptionT;
+use either::Either;
 use futures::future::LocalFutureObj;
 use std::collections::VecDeque;
 use std::ops::Deref;
@@ -33,12 +34,16 @@ pub enum Lifted<
     VecDeque(VecDeque<A>),
 
     Result(Result<A, B>),
-    OptionT(Box<OptionT<'a, G, A, B>>),
-    Kleisli(Box<dyn Kleisli<'a, F, A, B>>),
+    Either(Either<A, B>),
+
+    // Implementing OptionT as an HKT causes drop-check recursion
+    //    OptionT(Box<OptionT<'a, G, A, B>>),
+    Kleisli(Box<dyn Kleisli<'a, F, A, B, G>>),
     Iterator(Box<dyn Iterator<Item = A> + 'a>),
     Future(LocalFutureObj<'a, A>),
 
-    __Marker(*const F),
+    __MarkerF(*const F),
+    __MarkerG(*const G),
 }
 
 pub trait Lift<'a, F, A, Z = Nothing, G = Nothing> {
