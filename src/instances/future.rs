@@ -50,7 +50,7 @@ impl<'a, Z, G> Applicative<'a, FutureKind, Z, G> for FutureKind {
     {
         let ff = ff.unlift();
         let fa = fa.unlift();
-        ff.map(|ff| fa.map(|a| ff(a))).flatten().lift()
+        ff.map(|ff| fa.map(ff)).flatten().lift()
     }
 
     fn point<A>(a: A) -> Lifted<'a, FutureKind, A, Z, G> {
@@ -75,7 +75,7 @@ impl<'a, Z, G> Monad<'a, FutureKind, Z, G> for FutureKind {
 mod tests {
     use super::*;
     use data::kleisli;
-    use data::kleisli::{Kleisli, KleisliExt};
+    use data::kleisli::KleisliExt;
     use futures::executor::block_on;
     use futures::future;
     use test::*;

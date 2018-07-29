@@ -2,10 +2,7 @@
 #![feature(fn_traits)]
 #![feature(unboxed_closures)]
 #![feature(tool_attributes)]
-#![feature(futures_api, pin)]
-#![feature(fnbox)]
-#![feature(box_syntax)]
-extern crate core;
+#![feature(futures_api)]
 extern crate futures;
 extern crate test;
 pub mod applicative;

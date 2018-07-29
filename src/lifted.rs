@@ -16,6 +16,7 @@ impl Iterator for Nothing {
     }
 }
 
+/// Lifted represents a
 pub enum Lifted<
     'a,
     F,           // The HKT of this Lifted
@@ -91,9 +92,9 @@ mod tests {
     use std::mem;
     #[test]
     fn test_lifted_size() {
-        let s = Some("foo".to_owned()).lift();
-        let s2 = Some("foo".to_owned());
-        assert_eq!(mem::size_of_val(&s), mem::size_of_val(&s2) + 16)
+        let s = Some("foo").lift();
+        let s2 = Some("foo");
+        assert_eq!(mem::size_of_val(&s), mem::size_of_val(&s2) + 24) // yikes!
     }
 
     #[test]
