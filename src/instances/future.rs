@@ -3,6 +3,7 @@ use functor::Functor;
 use futures::future::{Future, LocalFutureObj};
 use futures::FutureExt;
 use lifted::*;
+use monad::Monad;
 
 pub struct FutureKind;
 
@@ -58,32 +59,52 @@ impl<'a, Z, G> Applicative<'a, FutureKind, Z, G> for FutureKind {
     }
 }
 
+impl<'a, Z, G> Monad<'a, FutureKind, Z, G> for FutureKind {
+    fn flat_map<A, B, Func>(
+        fa: Lifted<'a, FutureKind, A, Z, G>,
+        func: Func,
+    ) -> Lifted<'a, FutureKind, B, Z, G>
+    where
+        Func: Fn(A) -> Lifted<'a, FutureKind, B, Z, G> + 'a,
+    {
+        let fa = fa.unlift();
+        fa.map(move |f| func(f).unlift()).flatten().lift()
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
     use data::kleisli;
-    use data::kleisli::KleisliExt;
+    use data::kleisli::{Kleisli, KleisliExt};
     use futures::executor::block_on;
     use futures::future;
     use test::*;
 
     #[test]
-    fn test_kleisli_map() {
-        let k = kleisli::lift::<FutureKind, i32, i32, Nothing, Nothing, _, _>(|i: i32| {
-            future::lazy(move |_| i)
+    fn test_kleisli_map_and_compose() {
+        let parse = kleisli::run(|s: &str| {
+            let l: Lifted<FutureKind, i32, Nothing, Nothing> =
+                future::lazy(move |_| s.parse::<i32>().unwrap()).lift();
+            l
         });
-        let k = k.map(|i| i * 2);
-        assert_eq!(block_on(k.runlift(15)), 30);
+
+        let reciprocal = kleisli::lift(|i: i32| future::lazy(move |_| 1.0 / i as f32));
+
+        let parse_and_recriprocal = reciprocal.compose(parse);
+
+        assert_eq!(block_on(parse_and_recriprocal.runlift("123")), 0.008130081);
+        let doubled = parse_and_recriprocal.map(|f| f * 2f32);
+        assert_eq!(block_on(doubled.runlift("123")), 0.016260162);
     }
 
     #[test]
     fn test_applicative() {
-        let fut: Lifted<FutureKind, &str, Nothing, Nothing> = future::lazy(|_| "yospos").lift();
-        let fut2: Lifted<FutureKind, &str, Nothing, Nothing> = future::lazy(|_| "bictch").lift();
+        let fut: Lifted<FutureKind, &str, Nothing, Nothing> = future::lazy(|_| "hello").lift();
+        let fut2: Lifted<FutureKind, &str, Nothing, Nothing> = future::lazy(|_| "friends").lift();
 
         assert_eq!(
             block_on(FutureKind::product(fut, fut2).unlift()),
-            ("yospos", "bictch")
+            ("hello", "friends")
         )
     }
 

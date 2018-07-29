@@ -32,10 +32,10 @@ where
     fn compose<Z2, K>(self, k: K) -> Compose<A, Self, K>
     where
         F: Monad<'a, F, Z, G>,
-        K: Kleisli<'a, F, Z2, A, Z, G>,
+        K: Kleisli<'a, F, Z2, A, Z, G> + 'a,
     {
         Compose {
-            k1: self,
+            k1: Rc::new(self),
             k2: k,
             marker: PhantomData,
         }
@@ -83,7 +83,7 @@ where
 
 /// Compose
 pub struct Compose<A, K1, K2> {
-    k1: K1,
+    k1: Rc<K1>,
     k2: K2,
     marker: PhantomData<*const A>,
 }
@@ -93,11 +93,12 @@ where
     A: 'a,
     B: 'a,
     F: Monad<'a, F, Z, G>,
-    K1: Kleisli<'a, F, A, B, Z, G>,
+    K1: Kleisli<'a, F, A, B, Z, G> + 'a,
     K2: Kleisli<'a, F, C, A, Z, G>,
 {
     fn run(&self, a: C) -> Lifted<'a, F, B, Z, G> {
-        F::flat_map(self.k2.run(a), |a| self.k1.run(a))
+        let k1 = self.k1.clone();
+        F::flat_map(self.k2.run(a), move |a| k1.run(a))
     }
 }
 
@@ -123,10 +124,9 @@ where
     }
 }
 
-pub fn run<'a, F, A, B, Z, G>(
-    run: impl Fn(A) -> Lifted<'a, F, B, Z, G> + 'a,
-) -> impl Kleisli<'a, F, A, B, Z, G>
+pub fn run<'a, F, A, B, Z, G, Func>(run: Func) -> impl Kleisli<'a, F, A, B, Z, G>
 where
+    Func: Fn(A) -> Lifted<'a, F, B, Z, G> + 'a,
     F: 'static,
     G: 'static,
     B: 'a,
