@@ -26,7 +26,7 @@ where
     where
         Lifted<'a, F, B, Z, G>: Unlift<F>,
     {
-        Kleisli::<_, _, _, _, _>::run(self, a).unlift()
+        Kleisli::run(self, a).unlift()
     }
 
     fn compose<Z2, K>(self, k: K) -> Compose<A, Self, K>
@@ -181,53 +181,6 @@ where
 {
     extern "rust-call" fn call_mut(&mut self, args: (A,)) -> Self::Output {
         self.0.call(args)
-    }
-}
-
-///
-impl<'a, F, A, B, Z, G> Fn<(A,)> for Kleisli<'a, F, A, B, Z, G>
-where
-    Lifted<'a, F, B, Z, G>: Unlift<F>,
-    Self: Sized + 'a,
-    A: 'a,
-    G: 'static,
-    B: 'a,
-    Z: 'a,
-    F: 'static,
-{
-    extern "rust-call" fn call(&self, args: (A,)) -> Self::Output {
-        self.run(args.0).unlift()
-    }
-}
-
-impl<'a, F, A, B, Z, G> FnOnce<(A,)> for Kleisli<'a, F, A, B, Z, G>
-where
-    Lifted<'a, F, B, Z, G>: Unlift<F>,
-    Self: Sized + 'a,
-    B: 'a,
-    G: 'static,
-    Z: 'a,
-    F: 'static,
-{
-    type Output = <Lifted<'a, F, B, Z, G> as Unlift<F>>::Out;
-
-    extern "rust-call" fn call_once(self, args: (A,)) -> Self::Output {
-        self.run(args.0).unlift()
-    }
-}
-
-impl<'a, F, A, B, Z, G> FnMut<(A,)> for Kleisli<'a, F, A, B, Z, G>
-where
-    Lifted<'a, F, B, Z, G>: Unlift<F>,
-    Self: Sized,
-    A: 'a,
-    G: 'static,
-    B: 'a,
-    Z: 'a,
-    F: 'static,
-{
-    extern "rust-call" fn call_mut(&mut self, args: (A,)) -> Self::Output {
-        self.run(args.0).unlift()
     }
 }
 

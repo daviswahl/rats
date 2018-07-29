@@ -83,6 +83,8 @@ mod tests {
     #[test]
     fn test_kleisli_map_and_compose() {
         let parse = kleisli::run(|s: &str| {
+            // I think it's possible to get around the type annotations here but I need to redesign
+            // a few things.
             let l: Lifted<FutureKind, i32, Nothing, Nothing> =
                 future::lazy(move |_| s.parse::<i32>().unwrap()).lift();
             l
@@ -92,9 +94,12 @@ mod tests {
 
         let parse_and_recriprocal = reciprocal.compose(parse);
 
-        assert_eq!(block_on(parse_and_recriprocal.runlift("123")), 0.008130081);
+        assert_eq!(
+            block_on(parse_and_recriprocal.runlift("123")),
+            0.008130081f32
+        );
         let doubled = parse_and_recriprocal.map(|f| f * 2f32);
-        assert_eq!(block_on(doubled.runlift("123")), 0.016260162);
+        assert_eq!(block_on(doubled.runlift("123")), 0.016260162f32);
     }
 
     #[test]
