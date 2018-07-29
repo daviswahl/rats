@@ -3,6 +3,7 @@
 #![feature(unboxed_closures)]
 #![feature(tool_attributes)]
 #![feature(futures_api)]
+extern crate core;
 extern crate either;
 extern crate futures;
 extern crate test;

@@ -147,7 +147,7 @@ where
     self::run(move |a| run(a).lift())
 }
 
-pub struct RcFn<F>(Rc<F>);
+pub struct RcFn<F>(pub Rc<F>);
 
 impl<F> Clone for RcFn<F> {
     fn clone(&self) -> Self {
