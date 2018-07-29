@@ -1,5 +1,5 @@
 use data::kleisli::Kleisli;
-use data::option_t::OptionT;
+use data::option_t::t::OptionT;
 use either::Either;
 use futures::future::LocalFutureObj;
 use std::collections::VecDeque;
@@ -36,8 +36,7 @@ pub enum Lifted<
     Result(Result<A, B>),
     Either(Either<A, B>),
 
-    // Implementing OptionT as an HKT causes drop-check recursion
-    //    OptionT(Box<OptionT<'a, G, A, B>>),
+    OptionT(Box<dyn OptionT<'a, F, A, B, G> + 'a>),
     Kleisli(Box<dyn Kleisli<'a, F, A, B, G>>),
     Iterator(Box<dyn Iterator<Item = A> + 'a>),
     Future(LocalFutureObj<'a, A>),
