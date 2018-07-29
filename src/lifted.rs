@@ -9,13 +9,6 @@ use std::ops::DerefMut;
 pub trait HKT: 'static {}
 
 pub struct Nothing {}
-impl Iterator for Nothing {
-    type Item = Nothing;
-
-    fn next(&mut self) -> Option<<Self as Iterator>::Item> {
-        unreachable!()
-    }
-}
 
 /// Lifted represents a
 pub enum Lifted<
