@@ -50,7 +50,7 @@ impl<'a, A> Lift<'a, OptionKind, A> for Option<A> {
 impl<'a> Functor<'a, OptionKind> for OptionKind {
     fn map<Func, A, B>(fa: Lifted<'a, OptionKind, A>, func: Func) -> Lifted<'a, OptionKind, B>
     where
-        Func: Fn(A) -> B,
+        Func: FnOnce(A) -> B,
     {
         match fa.unlift() {
             Some(a) => Some(func(a)),

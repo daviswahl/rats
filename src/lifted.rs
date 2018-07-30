@@ -2,6 +2,7 @@ use data::kleisli::Kleisli;
 use data::option_t::OptionT;
 use futures::future::LocalFutureObj;
 use std::collections::VecDeque;
+use std::marker::PhantomData;
 use std::ops::Deref;
 use std::ops::DerefMut;
 
@@ -33,12 +34,13 @@ pub enum Lifted<
     VecDeque(VecDeque<A>),
 
     Result(Result<A, B>),
-    OptionT(Box<OptionT<'a, G, A, B>>),
     Kleisli(Box<dyn Kleisli<'a, F, A, B>>),
     Iterator(Box<dyn Iterator<Item = A> + 'a>),
     Future(LocalFutureObj<'a, A>),
+    Lifted(Box<Lifted<'a, F, A, B, G>>),
 
-    __Marker(*const F),
+    __Marker(PhantomData<*const F>),
+    __MarkerG(PhantomData<*const G>),
 }
 
 pub trait Lift<'a, F, A, Z = Nothing, G = Nothing> {
