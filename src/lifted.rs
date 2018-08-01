@@ -4,6 +4,7 @@ use futures::future::LocalFutureObj;
 use std::collections::VecDeque;
 use std::ops::Deref;
 use std::ops::DerefMut;
+use std::marker::PhantomData;
 
 pub trait HKT: 'static {}
 
@@ -38,7 +39,7 @@ pub enum Lifted<
     Iterator(Box<dyn Iterator<Item = A> + 'a>),
     Future(LocalFutureObj<'a, A>),
 
-    __Marker(*const F),
+    __Marker(PhantomData<*const F>),
 }
 
 pub trait Lift<'a, F, A, Z = Nothing, G = Nothing> {

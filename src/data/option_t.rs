@@ -1,7 +1,7 @@
 use functor::Functor;
 use lifted::{Lifted, Nothing};
 
-/// OptionT supports G but not when Lifted as the G parameter will be used as F in the Lifted enum.
+// This is completely wrong but is proving very difficult to get right!
 pub struct OptionT<'f, F, A, Z = Nothing, G = Nothing>
 where
     F: 'static,

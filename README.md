@@ -1,7 +1,7 @@
 # Rats
 
 Rats is an experimental, type-level functional programming library for Rust,
-based heavily on Scala's Cats (which itself is based heavily on ScalaZ). There have been a few explorations in this space,
+based heavily on Scala's Cats (which itself is based heavily on Scalaz). There have been a few explorations in this space,
 but I believe Rats takes it much further than was previously possible.
 
 Rats has a few goals: 
